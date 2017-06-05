@@ -28,12 +28,12 @@ r = main$objects[[opts$channel]]
 if(is.null(r)) {
     stop('Channel not found')
 }
-max = r$number_values * r$properties[['wf_increment']]
+nmax = r$number_values * r$properties[['wf_increment']]
 if(opts$whole) {
-    e = max-15
+    e = nmax-15
     s = 15
 } else {
-    e = max
+    e = nmax
     s = 0
 }
 
@@ -53,7 +53,7 @@ if(opts$direction == 'none' & opts$type == 'volts') {
 
 peaks = data.frame(peaks=numeric(), direction=character())
 for(i in seq(1,length(dat),by=3)) {
-    ns = i - 1000
+    ns = max(i - 1000,1)
     ne = i + 1000
     if(opts$verbose & i%%100000==0) {
         print(sprintf("%f%%",100*i/length(dat)))
