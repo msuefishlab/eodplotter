@@ -27,7 +27,7 @@ if (is.null(opts$file)) {
 if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
-peaksets = fread(opts$file, stringsAsFactors=F)
+peaksets = fread(opts$file)
 totalplotdata = lapply(1:nrow(peaksets), function(i) {
     f = peaksets[i,1][[1]]
     p = peaksets[i,2][[1]]
@@ -45,8 +45,8 @@ totalplotdata = lapply(1:nrow(peaksets), function(i) {
     if(opts$verbose) {
         print(paste0('gathering peak data...', f))
     }
-    peaks = read.table(p, sep='\t',stringsAsFactors=F)
-    if(nrow(peaks)>0) {
+    if(file.info(p)$size>0) {
+        peaks = fread(p)
         do.call(rbind, apply(peaks, 1, function(row) {
             start = as.numeric(row[[1]])
             s = start - opts$window / 2
