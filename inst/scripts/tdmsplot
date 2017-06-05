@@ -5,7 +5,7 @@ suppressPackageStartupMessages(library("optparse"))
 parser <- OptionParser()
 parser <- add_option(parser, c("-f", "--file"), dest="tdms", help="TDMS file input")
 parser <- add_option(parser, c("-v", "--verbose"), dest="verbose", help="Print verbose output")
-parser <- add_option(parser, c("-c", "--channel"), help="Channel name")
+parser <- add_option(parser, c("-c", "--channel"), default="/'Untitled'/'Dev1/ai0'", help="Channel name")
 parser <- add_option(parser, c("-s", "--start"), type="double", help="Start time")
 parser <- add_option(parser, c("-e", "--end"), type="double", help="End time")
 parser <- add_option(parser, c("-o", "--out"), dest="out", help="Output png")
@@ -14,7 +14,7 @@ options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
 
 if (is.null(opts$tdms) || is.null(opts$out)) {
-    stop('Usage: tdmsplot -f <file> -c <object> -o <output>')
+    print_help(parser)
 }
 
 if (!file.exists(opts$tdms)) {
@@ -25,8 +25,7 @@ main = TdmsFile$new(m)
 
 
 
-c = ifelse(is.null(opts$channel), "/'Untitled'/'Dev1/ai0'", opts$channel)
-r = main$objects[[c]]
+r = main$objects[[opts$channel]]
 if(is.null(r)) {
     stop('Channel not found')
 }
@@ -51,7 +50,6 @@ if(e - s > 20) {
     dat = dat[1:length(t)]
     plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
 } else {
-    output$txt2 <- renderText('')
     plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
 }
 title(opts$tdms)
