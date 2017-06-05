@@ -31,7 +31,6 @@ peaksets = fread(opts$file, stringsAsFactors=F)
 totalplotdata = lapply(1:nrow(peaksets), function(i) {
     f = peaksets[i,1][[1]]
     p = peaksets[i,2][[1]]
-    print(f[[1]])
     m = file(f, 'rb')
     main = TdmsFile$new(m)
     r = main$objects[[opts$channel]]
@@ -47,30 +46,34 @@ totalplotdata = lapply(1:nrow(peaksets), function(i) {
         print(paste0('gathering peak data...', f))
     }
     peaks = read.table(p, sep='\t',stringsAsFactors=F)
-    do.call(rbind, apply(peaks, 1, function(row) {
-        start = as.numeric(row[[1]])
-        s = start - opts$window / 2
-        e = start + opts$window / 2
-        sp = s/inc
-        ep = e/inc
-        dat = r$data[sp:ep]
-        t = seq(s, e, by = inc) - s
-        t = t[1:length(dat)]
-        if(row[[2]] == '-') {
-            dat = -dat
-        }
-        if(opts$preBaselineSubtract) {
-            dat = dat - mean(dat[1:25])
-        }
-        if(opts$normalize) {
-            dat = (dat - min(dat)) / (max(dat) - min(dat))
-        }
-        if(opts$postBaselineSubtract) {
-            dat = dat - mean(dat[1:25])
-        }
-        # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
-        data.frame(col = start, time = round(t, digits=5), data = dat, filename = basename(f))
-    }))
+    if(nrow(peaks)>0) {
+        do.call(rbind, apply(peaks, 1, function(row) {
+            start = as.numeric(row[[1]])
+            s = start - opts$window / 2
+            e = start + opts$window / 2
+            sp = s/inc
+            ep = e/inc
+            dat = r$data[sp:ep]
+            t = seq(s, e, by = inc) - s
+            t = t[1:length(dat)]
+            if(row[[2]] == '-') {
+                dat = -dat
+            }
+            if(opts$preBaselineSubtract) {
+                dat = dat - mean(dat[1:25])
+            }
+            if(opts$normalize) {
+                dat = (dat - min(dat)) / (max(dat) - min(dat))
+            }
+            if(opts$postBaselineSubtract) {
+                dat = dat - mean(dat[1:25])
+            }
+            # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
+            data.frame(col = start, time = round(t, digits=5), data = dat, filename = basename(f))
+        }))
+    } else {
+        data.frame(col = numeric(0), time = numeric(0), data = numeric(0), filename = character(0))
+    }
 })
 
 
