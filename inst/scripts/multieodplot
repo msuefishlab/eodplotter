@@ -3,6 +3,7 @@
 library(tdmsreader)
 library(ggplot2)
 library(reshape2)
+library(data.table)
 
 suppressPackageStartupMessages(library('optparse'))
 parser <- OptionParser()
@@ -26,10 +27,11 @@ if (is.null(opts$file)) {
 if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
-peaksets = read.csv(opts$file, stringsAsFactors=F)
+peaksets = fread(opts$file, stringsAsFactors=F)
 totalplotdata = lapply(1:nrow(peaksets), function(i) {
-    f = peaksets[i,1]
-    p = peaksets[i,2]
+    f = peaksets[i,1][[1]]
+    p = peaksets[i,2][[1]]
+    print(f[[1]])
     m = file(f, 'rb')
     main = TdmsFile$new(m)
     r = main$objects[[opts$channel]]

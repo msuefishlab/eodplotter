@@ -9,7 +9,7 @@ parser <- add_option(parser, c('-c', '--channel'), default="/'Untitled'/'Dev1/ai
 parser <- add_option(parser, c('-t', '--type'), default="sigma", help='Peak finder type, cutoff or sigma')
 parser <- add_option(parser, c('-n', '--number'), type="double", default=5, help='Peak finder threshold, sigma or voltage threshold')
 parser <- add_option(parser, c('-d', '--direction'), default = "none", help='Direction, enter either positive/negative/none')
-parser <- add_option(parser, c('-w', '--whole'), default = F, type="logical", action="store_true", help="Remove first and last 15 seconds")
+parser <- add_option(parser, c('-r', '--remove'), default = 0, type="double", help="Amount to remove from start/end of recording")
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
@@ -28,14 +28,9 @@ r = main$objects[[opts$channel]]
 if(is.null(r)) {
     stop('Channel not found')
 }
-nmax = r$number_values * r$properties[['wf_increment']]
-if(opts$whole) {
-    e = nmax-15
-    s = 15
-} else {
-    e = nmax
-    s = 0
-}
+total_vals = r$number_values * r$properties[['wf_increment']]
+e = total_vals - opts$remove
+s = opts$remove
 
 main$read_data(m, s, e)
 t = r$time_track(start = s, end = e)
@@ -55,30 +50,48 @@ peaks = data.frame(peaks=numeric(), direction=character())
 for(i in seq(1,length(dat),by=3)) {
     ns = max(i - 1000,1)
     ne = i + 1000
+    
     if(opts$verbose & i%%100000==0) {
         print(sprintf("%f%%",100*i/length(dat)))
     }
     if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - currTime) > 0.001) {
         if(opts$type == 'sigma') {
             if(dat[i] > mymean + mysd * opts$number & (opts$direction == 'none' | opts$direction == 'positive')) {
-                peaks = rbind(peaks, data.frame(peaks=t[ns + which.max(dat[ns:ne])], direction='+'))
-                currTime = t[i]
+                loc_max = which.max(dat[ns:ne])
+                loc_min = which.min(dat[ns:ne])
+                if(loc_min>=loc_max) {
+                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
+                    currTime = t[i]
+                }
             } else if(dat[i] < mymean - mysd * opts$number  & (opts$direction == 'none' | opts$direction == 'negative')) {
-                peaks = rbind(peaks, data.frame(peaks=t[ns + which.min(dat[ns:ne])], direction='-'))
-                currTime = t[i]
+                loc_max = which.max(dat[ns:ne])
+                loc_min = which.min(dat[ns:ne])
+                if(loc_max<loc_min) {
+                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
+                    currTime = t[i]
+                }
             }
         } else if(opts$type == 'volts') {
             if(dat[i] > opts$number & (opts$direction == 'positive')) {
-                peaks = rbind(peaks, data.frame(peaks=t[ns + which.max(dat[ns:ne])], direction='+'))
-                print(t[ns + which.max(dat[ns:ne])])
-                currTime = t[i]
+                loc_max = which.max(dat[ns:ne])
+                loc_min = which.min(dat[ns:ne])
+                if(loc_max<loc_min) {
+                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
+                    currTime = t[i]
+                }
             } else if(dat[i] < opts$number & (opts$direction == 'negative')) {
-                peaks = rbind(peaks, data.frame(peaks=t[ns + which.min(dat[ns:ne])], direction='-'))
-                currTime = t[i]
+                loc_max = which.max(dat[ns:ne])
+                loc_min = which.min(dat[ns:ne])
+                if(loc_min<loc_max) {
+                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
+                    currTime = t[i]
+                }
             }
         }
     }
 }
-
+if(nrow(peaks)==0) {
+    print(sprintf('No peaks found in %s', basename(opts$file)))
+}
 write.table(peaks, file=paste0(basename(opts$file),'.peaks.csv'), quote=F, row.names=F, sep='\t', col.names=F)
 
