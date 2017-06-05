@@ -50,42 +50,23 @@ peaks = data.frame(peaks=numeric(), direction=character())
 for(i in seq(1,length(dat),by=3)) {
     ns = max(i - 1000,1)
     ne = i + 1000
+    loc_max = which.max(dat[ns:ne])
+    loc_min = which.min(dat[ns:ne])
     
     if(opts$verbose & i%%100000==0) {
         print(sprintf("%f%%",100*i/length(dat)))
     }
-    if(!is.na(t[i]) & !is.na(dat[i]) & (t[i] - currTime) > 0.001) {
-        if(opts$type == 'sigma') {
-            if(dat[i] > mymean + mysd * opts$number & (opts$direction == 'none' | opts$direction == 'positive')) {
-                loc_max = which.max(dat[ns:ne])
-                loc_min = which.min(dat[ns:ne])
-                if(loc_min>=loc_max) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
-                    currTime = t[i]
-                }
-            } else if(dat[i] < mymean - mysd * opts$number  & (opts$direction == 'none' | opts$direction == 'negative')) {
-                loc_max = which.max(dat[ns:ne])
-                loc_min = which.min(dat[ns:ne])
-                if(loc_max<loc_min) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
-                    currTime = t[i]
-                }
+    if(t[i] - currTime > 0.001) {
+        if(dat[i] > mymean + mysd * opts$number) {
+            #print(sprintf('found %f %f',t[loc_max],t[loc_min]))
+            if(loc_min>=loc_max) {
+                peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
+                currTime = t[i]
             }
-        } else if(opts$type == 'volts') {
-            if(dat[i] > opts$number & (opts$direction == 'positive')) {
-                loc_max = which.max(dat[ns:ne])
-                loc_min = which.min(dat[ns:ne])
-                if(loc_max<loc_min) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
-                    currTime = t[i]
-                }
-            } else if(dat[i] < opts$number & (opts$direction == 'negative')) {
-                loc_max = which.max(dat[ns:ne])
-                loc_min = which.min(dat[ns:ne])
-                if(loc_min<loc_max) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
-                    currTime = t[i]
-                }
+        } else if(dat[i] < mymean - mysd * opts$number) {
+            if(loc_max>=loc_min) {
+                peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
+                currTime = t[i]
             }
         }
     }
