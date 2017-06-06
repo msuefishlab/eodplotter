@@ -2,10 +2,9 @@
 
 library(tdmsreader)
 library(ggplot2)
-library(reshape2)
-library(data.table)
-
+suppressPackageStartupMessages(library('data.table'))
 suppressPackageStartupMessages(library('optparse'))
+
 parser <- OptionParser()
 parser <- add_option(parser, c('-f', '--file'), help='TDMS/Peak file table')
 parser <- add_option(parser, c('-c', '--channel'), default = "/'Untitled'/'Dev1/ai0'", help='Channel name')
@@ -16,6 +15,7 @@ parser <- add_option(parser, c('-d', '--postbaseline'), default=F, dest='postBas
 parser <- add_option(parser, c('-n', '--normalize'), default=F, type = 'logical', action="store_true", help='Normalize waveform between 0-1 peak to peak height')
 parser <- add_option(parser, c('-a', '--alpha'), default=0.05, type = 'double', help='Transparency factor aka alpha channel for plotting EODs')
 parser <- add_option(parser, c('-p', '--pdf'), default=F, type="logical", action="store_true", help='Use PDF output')
+parser <- add_option(parser, c('-A', '--all'), dest='all', default=F, type="logical", action="store_true", help='Plot all traces')
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
@@ -28,6 +28,7 @@ if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
 peaksets = fread(opts$file)
+print(opts$all)
 totalplotdata = lapply(1:nrow(peaksets), function(i) {
     f = peaksets[i,1][[1]]
     p = peaksets[i,2][[1]]
@@ -51,17 +52,19 @@ totalplotdata = lapply(1:nrow(peaksets), function(i) {
             start = as.numeric(row[[1]])
             s = max(start - opts$window / 2,0)
             e = start + opts$window / 2
+
             sp = s/inc
             ep = e/inc
             dat = r$data[sp:ep]
-            t = seq(s, e, by = inc) - s
-            t = t[1:length(dat)]
             if(row[[2]] == '-') {
                 dat = -dat
             }
+            t = seq(s, e, by = inc) - start
+            t = t[1:length(dat)]
             if(opts$preBaselineSubtract) {
                 dat = dat - mean(dat[1:25])
             }
+            
             if(opts$normalize) {
                 dat = (dat - min(dat)) / (max(dat) - min(dat))
             }
@@ -94,16 +97,17 @@ myplot = ggplot(data=totalplotdata, aes(x=time, y=data, color = filename, group 
 myplot + ggtitle('Averaged peak data')
 invisible(dev.off())
 
-
-if(opts$verbose) {
-    print('plotting total peak...')
+print(opts$all)
+if(opts$all) {
+    if(opts$verbose) {
+        print('plotting total peak...')
+    }
+    if(opts$pdf) {
+        pdf('alltdms.all.pdf', width=20,height=9)
+    } else {
+        png('alltdms.all.png', width=2000, height=900)
+    }
+    myplot2 = ggplot(data=totalplotdata, aes(x=time, y=data, group = col, color=filename)) + geom_line(alpha=opts$alpha) + guides(colour = guide_legend(override.aes = list(alpha=1)))
+    myplot2 + ggtitle('Total peak data')
+    invisible(dev.off())
 }
-if(opts$pdf) {
-    pdf('alltdms.all.pdf', width=20,height=9)
-} else {
-    png('alltdms.all.png', width=2000, height=900)
-}
-myplot2 = ggplot(data=totalplotdata, aes(x=time, y=data, group = col, color=filename)) + geom_line(alpha=opts$alpha) + guides(colour = guide_legend(override.aes = list(alpha=1)))
-myplot2 + ggtitle('Total peak data')
-invisible(dev.off())
-
