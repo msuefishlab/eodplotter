@@ -3,54 +3,24 @@
 library(tdmsreader)
 suppressPackageStartupMessages(library("optparse"))
 parser <- OptionParser()
-parser <- add_option(parser, c("-f", "--file"), dest="tdms", help="TDMS file input")
-parser <- add_option(parser, c("-v", "--verbose"), dest="verbose", help="Print verbose output")
-parser <- add_option(parser, c("-c", "--channel"), default="/'Untitled'/'Dev1/ai0'", help="Channel name")
+parser <- add_option(parser, c("-f", "--file"), help="TDMS file input")
+parser <- add_option(parser, c("-v", "--verbose"), help="Print verbose output")
+parser <- add_option(parser, c("-c", "--channel"), help="Channel name")
 parser <- add_option(parser, c("-s", "--start"), type="double", help="Start time")
 parser <- add_option(parser, c("-e", "--end"), type="double", help="End time")
-parser <- add_option(parser, c("-o", "--out"), dest="out", help="Output png")
+parser <- add_option(parser, c("-o", "--out"), help="Output png")
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
 
-if (is.null(opts$tdms) || is.null(opts$out)) {
+if (is.null(opts$file) || is.null(opts$out)) {
     print_help(parser)
 }
 
 if (!file.exists(opts$tdms)) {
     stop('File not found')
 }
-m = file(opts$tdms, 'rb')
-main = TdmsFile$new(m)
 
-
-
-r = main$objects[[opts$channel]]
-if(is.null(r)) {
-    stop('Channel not found')
-}
-max = r$number_values * r$properties[['wf_increment']]
-e = ifelse(is.null(opts$end), max, opts$end)
-s = ifelse(is.null(opts$start), 0, opts$start)
-
-main$read_data(m, s, e)
-t = r$time_track(start = s, end = e)
-dat = r$data
-close(m)
-print(opts$out)
-png(opts$out, width=2000,height=500)
-if(e - s > 20) {
-    dat = dat[seq(1, length(dat), by = 10)]
-    t = t[seq(1, length(t), by = 10)]
-    dat = dat[1:length(t)]
-    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
-} else if(e - s > 10) {
-    dat = dat[seq(1, length(dat), by = 5)]
-    t = t[seq(1, length(t), by = 5)]
-    dat = dat[1:length(t)]
-    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
-} else {
-    plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
-}
-title(opts$tdms)
+png(opts$out, width=2000, height=900)
+plot(opts$filename, opts$channel, opts$start, opts$end)
 dev.off()

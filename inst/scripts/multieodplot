@@ -49,7 +49,7 @@ totalplotdata = lapply(1:nrow(peaksets), function(i) {
         peaks = fread(p)
         do.call(rbind, apply(peaks, 1, function(row) {
             start = as.numeric(row[[1]])
-            s = start - opts$window / 2
+            s = max(start - opts$window / 2,0)
             e = start + opts$window / 2
             sp = s/inc
             ep = e/inc
