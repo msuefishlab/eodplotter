@@ -1,6 +1,8 @@
 #!/usr/bin/env Rscript
 
 library(tdmsreader)
+library(eodplotter)
+
 suppressPackageStartupMessages(library("optparse"))
 parser <- OptionParser()
 parser <- add_option(parser, c("-f", "--file"), help="TDMS file input")
@@ -17,10 +19,10 @@ if (is.null(opts$file) || is.null(opts$out)) {
     print_help(parser)
 }
 
-if (!file.exists(opts$tdms)) {
+if (!file.exists(opts$file)) {
     stop('File not found')
 }
 
 png(opts$out, width=2000, height=900)
-plot(opts$filename, opts$channel, opts$start, opts$end)
+plotTdms(opts$file, opts$channel, opts$start, opts$end)
 dev.off()

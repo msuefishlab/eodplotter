@@ -1,10 +1,18 @@
 library(tdmsreader)
 
-function plotTdms(filename, channel = "/'Untitled'/'Dev/ai0'", start = 0, end = NULL) {
+#' Plot the signal vs time for a TDMS file
+#' @export
+#'
+#' @param filename The filename
+#' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
+#' @param start Default 0
+#' @param end Default end of tdms file data
+plotTdms <- function(filename, channel, start = 0, end = NULL) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
+    c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
 
-    r = main$objects[[channel]]
+    r = main$objects[[c]]
     if(is.null(r)) {
         stop('Channel not found')
     }
