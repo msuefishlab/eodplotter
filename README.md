@@ -18,7 +18,7 @@ Builds off the msuefishlab/tdmsreader. Also see msuefishlab/tdmsviewer
 I recommend setting up the script so that it is in your $PATH variable
 
 ```
-export PATH=$PATH:/Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts
+export PATH=$PATH:`Rscript -e 'cat(.libPaths())'`/eodplotter/inst/scripts
 function ploteod() {
     peak_finder -f "$1" -v
     eodplot -f "$1" -p "`basename $1`.peaks.csv" -v
