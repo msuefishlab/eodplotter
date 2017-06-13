@@ -182,8 +182,8 @@ stats = data.frame(
     duration=time2-time1,
     total_eods = nrow(peaks)
 )
-write.table(landmark_table, paste0(basename(opts$file), '.landmarks.csv'), quote=F, row.names=F)
-write.table(stats, paste0(basename(opts$file), '.stats.csv'), quote=F, row.names=F)
+write.csv(landmark_table, paste0(basename(opts$file), '.landmarks.csv'), quote=F, row.names=F)
+write.csv(stats, paste0(basename(opts$file), '.stats.csv'), quote=F, row.names=F)
 
 
 
