@@ -45,14 +45,16 @@ if(opts$direction == 'none' & opts$type == 'volts') {
     stop('Need to specify direction if using voltage cutoff')
 }
 
-
+if(opts$verbose) {
+    cat(sprintf("finding peaks for %s\n", opts$file))
+}
 peaks = data.frame(peaks=numeric(), direction=character())
 for(i in seq(1,length(dat),by=3)) {
     ns = max(i - 1000,1)
     ne = i + 1000
     
     if(opts$verbose & i%%100000==0) {
-        print(sprintf("%f%%",100*i/length(dat)))
+        cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
     }
     if(t[i] - currTime > 0.001) {
         if(dat[i] > mymean + mysd * opts$number) {
@@ -72,8 +74,13 @@ for(i in seq(1,length(dat),by=3)) {
         }
     }
 }
+
+if(opts$verbose) {
+    cat("\r", sprintf("progress 100%%\n"))
+    cat("done scanning\n")
+}
 if(nrow(peaks)==0) {
-    print(sprintf('No peaks found in %s', basename(opts$file)))
+    cat(sprintf('No peaks found in %s\n', opts$file))
 }
 write.table(peaks, file=paste0(basename(opts$file),'.peaks.csv'), quote=F, row.names=F, sep='\t', col.names=F)
 

@@ -25,10 +25,10 @@ if (is.null(opts$file) || is.null(opts$peak)) {
 }
 
 if (!file.exists(opts$file)) {
-    stop('TDMS file not found')
+    stop(sprintf('TDMS file not found', opts$file))
 }
 if (!file.exists(opts$peak)) {
-    stop('Peak file not found')
+    stop(sprintf('Peak file not found: %s', opts$peak))
 }
 m = file(opts$file, 'rb')
 main = TdmsFile$new(m)
@@ -47,7 +47,7 @@ main$read_data(m, s, e)
 close(m)
 
 if(opts$verbose) {
-    print('gathering peak data...')
+    cat('gathering peak data...\n')
 }
 peakdata = apply(peaks, 1, function(row) {
     start = as.numeric(row[[1]])
@@ -75,7 +75,7 @@ peakdata = apply(peaks, 1, function(row) {
     data.frame(col = start, time = round(t, digits=5), data = dat)
 })
 if(opts$verbose) {
-    print('combining data frames...')
+    cat('combining data frames...\n')
 }
 plotdata = do.call(rbind, peakdata)
 
@@ -86,6 +86,7 @@ plotdata = do.call(rbind, peakdata)
 
 ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
 avg = apply(ret, 1, mean)
+avg = avg[1:(length(avg)-1)]
 data = data.frame(time = as.numeric(names(avg)), val = as.numeric(avg))
 p1pos = which.max(data$val)
 p1 = data[p1pos, ]
@@ -190,28 +191,23 @@ write.table(stats, paste0(basename(opts$file), '.stats.csv'), quote=F, row.names
 
 mtitle = basename(opts$file)
 if(opts$verbose) {
-    print('plotting average peak...')
+    cat('plotting average peak...\n')
 }
 png(paste0(basename(opts$file), '.average.png'), width=1000, height=600)
-myplot = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
-myplot + ggtitle(mtitle)
+invisible(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle(mtitle))
 invisible(dev.off())
 if(opts$verbose) {
-    print('plotting total peak...')
+    cat('plotting total peak...\n')
 }
 png(paste0(basename(opts$file), '.all.png'), width=1000, height=600)
-myplot2 = ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=opts$alpha)
-myplot2 + ggtitle(mtitle)
+invisible(ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=opts$alpha) + ggtitle(mtitle))
 invisible(dev.off())
 
 if(opts$verbose) {
-    print('plotting average peak (with landmarks)...')
+    cat('plotting average peak (with landmarks)...\n')
 }
 
 png(paste0(basename(opts$file), '.average.landmarks.png'), width=1000, height=600)
-myplot = myplot + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1")
-myplot + ggtitle(mtitle)
+invisible(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1") + ggtitle(mtitle))
 invisible(dev.off())
-
-
 
