@@ -194,13 +194,13 @@ if(opts$verbose) {
     cat('plotting average peak...\n')
 }
 png(paste0(basename(opts$file), '.average.png'), width=1000, height=600)
-invisible(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle(mtitle))
+suppressMessages(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle(mtitle))
 invisible(dev.off())
 if(opts$verbose) {
     cat('plotting total peak...\n')
 }
 png(paste0(basename(opts$file), '.all.png'), width=1000, height=600)
-invisible(ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=opts$alpha) + ggtitle(mtitle))
+suppressMessages(ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=opts$alpha) + ggtitle(mtitle))
 invisible(dev.off())
 
 if(opts$verbose) {
@@ -208,6 +208,6 @@ if(opts$verbose) {
 }
 
 png(paste0(basename(opts$file), '.average.landmarks.png'), width=1000, height=600)
-invisible(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1") + ggtitle(mtitle))
+suppressMessages(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1") + ggtitle(mtitle))
 invisible(dev.off())
 
