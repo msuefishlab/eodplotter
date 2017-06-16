@@ -7,6 +7,7 @@ library(tdmsreader)
 #' @import tdmsreader
 #'
 #' @param filename The filename
+#' @param peaks A data.frame of peaks (time, direction +/-)
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
 #' @param prebaseline Subtract baseline pre normalization
 #' @param postbaseline Subtract baseline post normalization
@@ -69,6 +70,7 @@ getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", pr
 #' @import ggplot2
 #'
 #' @param filename The filename
+#' @param peaks A data.frame of peaks (time, direction +/-)
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
 #' @param prebaseline Subtract baseline pre normalization
 #' @param postbaseline Subtract baseline post normalization
