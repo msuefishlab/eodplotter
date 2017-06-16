@@ -1,8 +1,9 @@
 library(tdmsreader)
 
-#' Plot EODs and find EOD statistics
+
+
+#' Get EOD matrix
 #' @export
-#' @import ggplot2
 #'
 #' @param filename The filename
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
@@ -12,7 +13,7 @@ library(tdmsreader)
 #' @param alpha Alpha channel for all EODs plot
 #' @param window Window size
 #' @param verbose Set verbose output
-plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
+getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
     c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
@@ -56,7 +57,26 @@ plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebase
     if(verbose) {
         cat('combining data frames...\n')
     }
-    plotdata = do.call(rbind, peakdata)
+    do.call(rbind, peakdata)
+}
+
+
+
+
+#' Plot EODs and find EOD statistics
+#' @export
+#' @import ggplot2
+#'
+#' @param filename The filename
+#' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
+#' @param prebaseline Subtract baseline pre normalization
+#' @param postbaseline Subtract baseline post normalization
+#' @param normalize Normalize data to 0-1
+#' @param alpha Alpha channel for all EODs plot
+#' @param window Window size
+#' @param verbose Set verbose output
+plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
+    plotdata = getEODMatrix(filename, peaks, channel, prebaseline, postbaseline, normalize, alpha, window, verbose)
 
     ret = reshape2::acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
     avg = apply(ret, 1, mean)
