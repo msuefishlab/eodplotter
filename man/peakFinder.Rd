@@ -4,7 +4,8 @@
 \alias{peakFinder}
 \title{Find peaks from a TDMS file}
 \usage{
-peakFinder(filename, channel, direction, threshold, remove, verbose)
+peakFinder(filename, channel = "/'Untitled'/'Dev1/ai0'", direction = "none",
+  threshold = 5, remove = 0, verbose = F)
 }
 \arguments{
 \item{filename}{The filename}

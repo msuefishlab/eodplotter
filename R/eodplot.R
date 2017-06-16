@@ -4,6 +4,7 @@ library(tdmsreader)
 
 #' Get EOD matrix
 #' @export
+#' @import tdmsreader
 #'
 #' @param filename The filename
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
