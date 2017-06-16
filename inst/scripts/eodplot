@@ -2,7 +2,6 @@
 
 library(tdmsreader)
 library(eodplotter)
-library(data.table)
 
 suppressPackageStartupMessages(library('optparse'))
 parser <- OptionParser()
@@ -30,5 +29,5 @@ if (!file.exists(opts$peak)) {
     stop(sprintf('Peak file not found: %s', opts$peak))
 }
 
-p = fread(opts$peak)
+p = read.csv(opts$peak)
 plotEod(opts$file, peaks = p, channel = opts$channel, window = opts$window, prebaseline = opts$prebaseline, postbaseline = opts$postbaseline, verbose = opts$verbose, alpha = opts$alpha, normalize = opts$normalize)

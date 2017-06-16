@@ -1,7 +1,8 @@
 # eodplotter
 
-Plot EOD
+Plot EODs from a tdms file
 
+[![Build Status](https://travis-ci.org/msuefishlab/eodplotter.svg?branch=master)](https://travis-ci.org/msuefishlab/eodplotter)
 
 ## Install
 

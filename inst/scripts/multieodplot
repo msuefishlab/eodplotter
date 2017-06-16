@@ -2,7 +2,6 @@
 
 library(tdmsreader)
 library(ggplot2)
-suppressPackageStartupMessages(library('data.table'))
 suppressPackageStartupMessages(library('optparse'))
 
 parser <- OptionParser()
@@ -27,7 +26,7 @@ if (is.null(opts$file)) {
 if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
-peaksets = fread(opts$file)
+peaksets = read.csv(opts$file)
 print(opts$all)
 totalplotdata = lapply(1:nrow(peaksets), function(i) {
     f = peaksets[i,1][[1]]
@@ -47,7 +46,7 @@ totalplotdata = lapply(1:nrow(peaksets), function(i) {
         print(paste0('gathering peak data...', f))
     }
     if(file.info(p)$size>0) {
-        peaks = fread(p)
+        peaks = read.csv(p)
         do.call(rbind, apply(peaks, 1, function(row) {
             start = as.numeric(row[[1]])
             s = max(start - opts$window / 2,0)
