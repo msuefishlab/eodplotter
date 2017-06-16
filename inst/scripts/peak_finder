@@ -21,66 +21,7 @@ if (is.null(opts$file)) {
 if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
-m = file(opts$file, 'rb')
-main = TdmsFile$new(m)
 
-r = main$objects[[opts$channel]]
-if(is.null(r)) {
-    stop('Channel not found')
-}
-total_vals = r$number_values * r$properties[['wf_increment']]
-e = total_vals - opts$remove
-s = opts$remove
+peakFinder(opts$file, opts$channel, opts$type, opts$number, opts$direction, opts$remove, opts$verbose)
 
-main$read_data(m, s, e)
-t = r$time_track(start = s, end = e)
-dat = r$data
-close(m)
-
-mysd = sd(dat)
-mymean = mean(dat)
-currTime = 0
-
-if(opts$direction == 'none' & opts$type == 'volts') {
-    stop('Need to specify direction if using voltage cutoff')
-}
-
-if(opts$verbose) {
-    cat(sprintf("finding peaks for %s\n", opts$file))
-}
-peaks = data.frame(peaks=numeric(), direction=character())
-for(i in seq(1,length(dat),by=3)) {
-    ns = max(i - 1000,1)
-    ne = i + 1000
-    
-    if(opts$verbose & i%%100000==0) {
-        cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
-    }
-    if(t[i] - currTime > 0.001) {
-        if(dat[i] > mymean + mysd * opts$number) {
-            loc_max = which.max(dat[ns:ne])
-            loc_min = which.min(dat[ns:ne])
-            if(loc_min>=loc_max) {
-                peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
-                currTime = t[i]
-            }
-        } else if(dat[i] < mymean - mysd * opts$number) {
-            loc_max = which.max(dat[ns:ne])
-            loc_min = which.min(dat[ns:ne])
-            if(loc_max>=loc_min) {
-                peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
-                currTime = t[i]
-            }
-        }
-    }
-}
-
-if(opts$verbose) {
-    cat("\r", sprintf("progress 100%%\n"))
-    cat("done scanning\n")
-}
-if(nrow(peaks)==0) {
-    cat(sprintf('No peaks found in %s\n', opts$file))
-}
-write.table(peaks, file=paste0(basename(opts$file),'.peaks.csv'), quote=F, row.names=F, sep='\t', col.names=F)
 
