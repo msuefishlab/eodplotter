@@ -2,11 +2,8 @@
 
 library(tdmsreader)
 library(eodplotter)
+library(data.table)
 
-
-png(paste0(basename(opts$file),'.signal.png'), width=2000, height=900)
-plotTdms(opts$file, opts$channel, opts$start, opts$end)
-invisible(dev.off())
 suppressPackageStartupMessages(library('optparse'))
 parser <- OptionParser()
 parser <- add_option(parser, c('-f', '--file'), help='TDMS file input')
@@ -14,11 +11,10 @@ parser <- add_option(parser, c('-p', '--peak'), help='Peak file input')
 parser <- add_option(parser, c('-v', '--verbose'), default=F, type="logical", action="store_true", help='Print verbose output')
 parser <- add_option(parser, c('-c', '--channel'), default = "/'Untitled'/'Dev1/ai0'", help='Channel name')
 parser <- add_option(parser, c('-w', '--window'), default = 0.005, type = 'double', help='Window size around peak value')
-parser <- add_option(parser, c('-b', '--prebaseline'), default=F, dest='preBaselineSubtract', type = 'logical', action="store_true", help='Pre-normalization baseline subtract')
-parser <- add_option(parser, c('-d', '--postbaseline'), default=F, dest='postBaselineSubtract', type = 'logical', action="store_true", help='Post-normalization baseline subtract')
+parser <- add_option(parser, c('-b', '--prebaseline'), default=F, type = 'logical', action="store_true", help='Pre-normalization baseline subtract')
+parser <- add_option(parser, c('-d', '--postbaseline'), default=F, type = 'logical', action="store_true", help='Post-normalization baseline subtract')
 parser <- add_option(parser, c('-n', '--normalize'), default=F, type = 'logical', action="store_true", help='Normalize waveform between 0-1 peak to peak height')
 parser <- add_option(parser, c('-a', '--alpha'), default=0.05, type = 'double', help='Alpha channel for individual peaks')
-parser <- add_option(parser, c('-o', '--out'), help='Output png')
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
@@ -34,6 +30,5 @@ if (!file.exists(opts$peak)) {
     stop(sprintf('Peak file not found: %s', opts$peak))
 }
 
-
-
-plotEod(opts$file, opts$peak, opts$channel, opts$start, opts$end)
+p = fread(opts$peak)
+plotEod(opts$file, peaks = p, channel = opts$channel, window = opts$window, prebaseline = opts$prebaseline, postbaseline = opts$postbaseline, verbose = opts$verbose, alpha = opts$alpha, normalize = opts$normalize)

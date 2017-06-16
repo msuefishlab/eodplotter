@@ -6,4 +6,5 @@
 *.swp
 *.Rcheck
 tdmsreader*.tar.gz
-*.peaks.csv
+*.csv
+*.png

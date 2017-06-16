@@ -1,34 +1,28 @@
-#!/usr/bin/env Rscript
-
 library(tdmsreader)
-library(ggplot2)
-library(reshape2)
-library(data.table)
 
-
-
-#' Plot the signal vs time for a TDMS file
+#' Plot EODs and find EOD statistics
 #' @export
+#' @import ggplot2
 #'
 #' @param filename The filename
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
-#' @param start Default 0
-#' @param end Default end of tdms file data
-plotEod <- function(filename, peakfile, channel, start = 0, end = NULL, prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
+#' @param prebaseline Subtract baseline pre normalization
+#' @param postbaseline Subtract baseline post normalization
+#' @param normalize Normalize data to 0-1
+#' @param alpha Alpha channel for all EODs plot
+#' @param window Window size
+#' @param verbose Set verbose output
+plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
-    peaks = fread(peakfile)
-
-    r = main$objects[[channel]]
+    c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
+    r = main$objects[[c]]
     if(is.null(r)) {
         stop('Channel not found')
     }
     inc = r$properties[['wf_increment']]
     max = r$number_values * inc
-    e = ifelse(is.null(end), max, end)
-    s = ifelse(is.null(start), 0, start)
-
-    main$read_data(m, s, e)
+    main$read_data(m, 0, max)
     close(m)
 
     if(verbose) {
@@ -64,12 +58,7 @@ plotEod <- function(filename, peakfile, channel, start = 0, end = NULL, prebasel
     }
     plotdata = do.call(rbind, peakdata)
 
-
-
-
-
-
-    ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
+    ret = reshape2::acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
     avg = apply(ret, 1, mean)
     avg = avg[1:(length(avg)-1)]
     data = data.frame(time = as.numeric(names(avg)), val = as.numeric(avg))
@@ -178,21 +167,26 @@ plotEod <- function(filename, peakfile, channel, start = 0, end = NULL, prebasel
     if(verbose) {
         cat('plotting average peak...\n')
     }
+
     png(paste0(basename(filename), '.average.png'), width=1000, height=600)
-    suppressMessages(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle(mtitle))
-    invisible(dev.off())
+    p = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle(mtitle)
+    print(p)
+    dev.off()
+
     if(verbose) {
         cat('plotting total peak...\n')
     }
     png(paste0(basename(filename), '.all.png'), width=1000, height=600)
-    suppressMessages(ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=opts$alpha) + ggtitle(mtitle))
-    invisible(dev.off())
+    p = ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=alpha) + ggtitle(mtitle)
+    print(p)
+    dev.off()
 
     if(verbose) {
         cat('plotting average peak (with landmarks)...\n')
     }
 
     png(paste0(basename(filename), '.average.landmarks.png'), width=1000, height=600)
-    suppressMessages(ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1") + ggtitle(mtitle))
-    invisible(dev.off())
+    p = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1") + ggtitle(mtitle)
+    print(p)
+    dev.off()
 }

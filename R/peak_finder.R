@@ -2,11 +2,21 @@
 
 library(tdmsreader)
 
-peakFinder <- function(filename, channel, type, number, remove, verbose) {
+#' Find peaks from a TDMS file
+#' @export
+#'
+#' @param filename The filename
+#' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
+#' @param direction Only get positive or negative peaks
+#' @param threshold Threshold for cutoff
+#' @param remove Remove N seconds from start and end of recording
+#' @param verbose Verbose output
+peakFinder <- function(filename, channel, direction, threshold, remove, verbose) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
 
-    r = main$objects[[channel]]
+    c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
+    r = main$objects[[c]]
     if(is.null(r)) {
         stop('Channel not found')
     }
@@ -23,10 +33,6 @@ peakFinder <- function(filename, channel, type, number, remove, verbose) {
     mymean = mean(dat)
     currTime = 0
 
-    if(direction == 'none' & type == 'volts') {
-        stop('Need to specify direction if using voltage cutoff')
-    }
-
     if(verbose) {
         cat(sprintf("finding peaks for %s\n", filename))
     }
@@ -39,14 +45,14 @@ peakFinder <- function(filename, channel, type, number, remove, verbose) {
             cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
         }
         if(t[i] - currTime > 0.001) {
-            if(dat[i] > mymean + mysd * number) {
+            if(dat[i] > mymean + mysd * threshold) {
                 loc_max = which.max(dat[ns:ne])
                 loc_min = which.min(dat[ns:ne])
                 if(loc_min>=loc_max) {
                     peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
                     currTime = t[i]
                 }
-            } else if(dat[i] < mymean - mysd * number) {
+            } else if(dat[i] < mymean - mysd * threshold) {
                 loc_max = which.max(dat[ns:ne])
                 loc_min = which.min(dat[ns:ne])
                 if(loc_max>=loc_min) {
@@ -64,6 +70,5 @@ peakFinder <- function(filename, channel, type, number, remove, verbose) {
     if(nrow(peaks)==0) {
         cat(sprintf('No peaks found in %s\n', filename))
     }
-    write.table(peaks, file=paste0(basename(filename),'.peaks.csv'), quote=F, row.names=F, sep='\t', col.names=F)
     peaks
 }
