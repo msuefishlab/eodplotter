@@ -11,7 +11,7 @@ library(tdmsreader)
 #' @param threshold Threshold for cutoff
 #' @param remove Remove N seconds from start and end of recording
 #' @param verbose Verbose output
-peakFinder <- function(filename, channel, direction, threshold, remove, verbose) {
+peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="none", threshold=5, remove=0, verbose=F) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
 
@@ -36,7 +36,7 @@ peakFinder <- function(filename, channel, direction, threshold, remove, verbose)
     if(verbose) {
         cat(sprintf("finding peaks for %s\n", filename))
     }
-    peaks = data.frame(peaks=numeric(), direction=character())
+    peaks = data.frame(peaks=numeric(), direction=character(), stringsAsFactors=F)
     for(i in seq(1,length(dat),by=3)) {
         ns = max(i - 1000,1)
         ne = i + 1000
@@ -49,14 +49,14 @@ peakFinder <- function(filename, channel, direction, threshold, remove, verbose)
                 loc_max = which.max(dat[ns:ne])
                 loc_min = which.min(dat[ns:ne])
                 if(loc_min>=loc_max) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+'))
+                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+',stringsAsFactors=F))
                     currTime = t[i]
                 }
             } else if(dat[i] < mymean - mysd * threshold) {
                 loc_max = which.max(dat[ns:ne])
                 loc_min = which.min(dat[ns:ne])
                 if(loc_max>=loc_min) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-'))
+                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-',stringsAsFactors=F))
                     currTime = t[i]
                 }
             }
