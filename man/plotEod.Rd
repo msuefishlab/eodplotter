@@ -11,6 +11,8 @@ plotEod(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'",
 \arguments{
 \item{filename}{The filename}
 
+\item{peaks}{A data.frame of peaks (time, direction +/-)}
+
 \item{channel}{The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab}
 
 \item{prebaseline}{Subtract baseline pre normalization}
