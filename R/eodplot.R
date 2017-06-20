@@ -158,8 +158,7 @@ findLandmarks <- function(plotdata) {
     if(!is.null(s2)) landmark_table = rbind(landmark_table, data.frame(landmark = 's2', time = s2$time, val = s2$val, mean = mean(s2_e$data,na.rm=T), sd = sd(s2_e$data,na.rm=T)))
     if(!is.null(zc1)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc1', time = zc1$time, val = zc1$val, mean = mean(zc1_e$data,na.rm=T), sd = sd(zc1_e$data,na.rm=T)))
     if(!is.null(zc2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc2', time = zc2$time, val = zc2$val, mean = mean(zc2_e$data,na.rm=T), sd = sd(zc2_e$data,na.rm=T)))
-
-
+    landmark_table
 }
 
 
@@ -189,6 +188,7 @@ getStats <- function(peaks, landmark_table) {
 #' @import ggplot2
 #'
 #' @param plotdata The EOD matrix from getEODMatrix
+#' @param verbose output debug info
 plotAverage <- function(plotdata, verbose = F) {
     if(verbose) {
         cat('plotting average peak...\n')
@@ -202,6 +202,8 @@ plotAverage <- function(plotdata, verbose = F) {
 #' @import ggplot2
 #'
 #' @param plotdata The EOD matrix from getEODMatrix
+#' @param alpha level of transparency
+#' @param verbose output debug info
 plotTotal <- function(plotdata, alpha = 0.05, verbose = F) {
     if(verbose) {
         cat('plotting average peak...\n')
@@ -216,6 +218,8 @@ plotTotal <- function(plotdata, alpha = 0.05, verbose = F) {
 #' @import ggplot2
 #'
 #' @param plotdata The EOD matrix from getEODMatrix
+#' @param landmark_table The landmark table from findLandmarks
+#' @param verbose output debug info
 plotLandmarks <- function(plotdata, landmark_table, verbose = F) {
     if(verbose) {
         cat('plotting eod with landmarks\n')

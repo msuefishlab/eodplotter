@@ -8,6 +8,10 @@ plotLandmarks(plotdata, landmark_table, verbose = F)
 }
 \arguments{
 \item{plotdata}{The EOD matrix from getEODMatrix}
+
+\item{landmark_table}{The landmark table from findLandmarks}
+
+\item{verbose}{output debug info}
 }
 \description{
 Plot all EOD signal with landmarks

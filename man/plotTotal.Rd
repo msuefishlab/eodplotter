@@ -8,6 +8,10 @@ plotTotal(plotdata, alpha = 0.05, verbose = F)
 }
 \arguments{
 \item{plotdata}{The EOD matrix from getEODMatrix}
+
+\item{alpha}{level of transparency}
+
+\item{verbose}{output debug info}
 }
 \description{
 Plot all EOD signals

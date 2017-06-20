@@ -8,6 +8,8 @@ plotAverage(plotdata, verbose = F)
 }
 \arguments{
 \item{plotdata}{The EOD matrix from getEODMatrix}
+
+\item{verbose}{output debug info}
 }
 \description{
 Plot average EOD signal
