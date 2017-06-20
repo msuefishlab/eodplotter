@@ -7,7 +7,7 @@ library(tdmsreader)
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
 #' @param start Default 0
 #' @param end Default end of tdms file data
-plotTdms <- function(filename, channel, start = 0, end = NULL) {
+plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, end = NULL) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
     c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
