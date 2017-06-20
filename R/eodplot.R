@@ -176,7 +176,7 @@ getStats <- function(peaks, landmark_table) {
     amp2=landmark_table[landmark_table$landmark=='p2',]$val
     time2=landmark_table[landmark_table$landmark=='t2',]$time
     time1=landmark_table[landmark_table$landmark=='t1',]$time
-    stats = data.frame(
+    data.frame(
         amplitude=amp1-amp2,
         duration=time2-time1,
         total_eods = nrow(peaks)

@@ -44,13 +44,6 @@ install_github('msuefishlab/eodplotter@0.0.2')
 ```
 ## Using EODPlotter
 
-Once the library is installed, you can use it using either
-
-
-- Command line
-- On R interactive prompt
-  
-### Usage
 
 Plot the raw signal of the data using plotTdms
 
@@ -109,3 +102,9 @@ Get stats about the landmarks
 ```{r}
 getStats(p, landmarks)
 ```
+
+
+# Conclusion
+
+
+This demo shows you how to do a number of features using the `eodplotter` library
