@@ -23,13 +23,13 @@ manager. EODPlotter is a command line alternative to the [TDMSViewer](https://gi
 
 We will install EODPlotter from github. Open RStudio and run
 
-```{r,eval = FALSE}
+```{r,eval=F}
 install.packages('devtools')
 ```
 
 This will install the devtools package which has the `install_github` function. Then run
 
-```{r,eval = FALSE}
+```{r,eval=F}
 devtools::install_github('msuefishlab/eodplotter')
 ```
 
@@ -39,7 +39,7 @@ dependencies automatically.
 To install a specific version, e.g. the version mentioned in this guide, you
 can also run
 
-```{r,eval = FALSE}
+```{r,eval=F}
 install_github('msuefishlab/eodplotter@0.0.2')
 ```
 ## Using EODPlotter
@@ -52,7 +52,11 @@ Once the library is installed, you can use it using either
   
 ### Using the command line
 
-Todo
+```{r}
+library(eodplotter)
+print(getwd())
+plotTdms('../tests/testthat/file.tdms')
+```
 
 ### Using the R library directly
 
