@@ -4,6 +4,10 @@ Plot EODs from a tdms file
 
 [![Build Status](https://travis-ci.org/msuefishlab/eodplotter.svg?branch=master)](https://travis-ci.org/msuefishlab/eodplotter)
 
+
+User guide: https://msuefishlab.github.io/eodplotter/user-guide.html
+
+
 ## Install
 
     install.packages('devtools')
@@ -14,21 +18,6 @@ Plot EODs from a tdms file
 Builds off the msuefishlab/tdmsreader. Also see msuefishlab/tdmsviewer
 
 
-## Recommended setup
+## User guide
 
-I recommend setting up the script so that it is in your $PATH variable
-
-```
-export PATH=$PATH:`Rscript -e 'cat(.libPaths())'`/eodplotter/scripts
-function ploteod() {
-   peak_finder -f "$1" -v
-   mypath=`basename "$1"`.peaks.csv
-   eodplot -f "$1" -p "$mypath" -v
-}
-```
-
-This way, you can simply open up your terminal and type
-
-    ploteod <filename>
-
-
+User guide/package vignette here: https://msuefishlab.github.io/eodplotter/user-guide.html
