@@ -8,3 +8,4 @@
 tdmsreader*.tar.gz
 *.csv
 *.png
+inst/doc
