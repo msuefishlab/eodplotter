@@ -64,24 +64,14 @@ getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", pr
 
 
 
-
-#' Plot EODs and find EOD statistics
+#' Plot EOD signal with landmarks
 #' @export
-#' @import ggplot2
+#' @import reshape2
 #'
-#' @param filename The filename
-#' @param peaks A data.frame of peaks (time, direction +/-)
-#' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
-#' @param prebaseline Subtract baseline pre normalization
-#' @param postbaseline Subtract baseline post normalization
-#' @param normalize Normalize data to 0-1
-#' @param alpha Alpha channel for all EODs plot
-#' @param window Window size
-#' @param verbose Set verbose output
-plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
-    plotdata = getEODMatrix(filename, peaks, channel, prebaseline, postbaseline, normalize, alpha, window, verbose)
+#' @param plotdata The EOD matrix from getEODMatrix
+findLandmarks <- function(plotdata) {
 
-    ret = reshape2::acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
+    ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
     avg = apply(ret, 1, mean)
     avg = avg[1:(length(avg)-1)]
     data = data.frame(time = as.numeric(names(avg)), val = as.numeric(avg))
@@ -170,6 +160,18 @@ plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebase
     if(!is.null(zc2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc2', time = zc2$time, val = zc2$val, mean = mean(zc2_e$data,na.rm=T), sd = sd(zc2_e$data,na.rm=T)))
 
 
+}
+
+
+
+
+#' Returns a data frame with stats about the landmarks 
+#' @export
+#' @import reshape2
+#'
+#' @param peaks list of peaks from peakFinder
+#' @param landmark_table List of landmark
+getStats <- function(peaks, landmark_table) {
     amp1=landmark_table[landmark_table$landmark=='p1',]$val
     amp2=landmark_table[landmark_table$landmark=='p2',]$val
     time2=landmark_table[landmark_table$landmark=='t2',]$time
@@ -179,37 +181,82 @@ plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebase
         duration=time2-time1,
         total_eods = nrow(peaks)
     )
-    write.csv(landmark_table, paste0(basename(filename), '.landmarks.csv'), quote=F, row.names=F)
-    write.csv(stats, paste0(basename(filename), '.stats.csv'), quote=F, row.names=F)
+}
 
 
+#' Plot average EOD signal
+#' @export
+#' @import ggplot2
+#'
+#' @param plotdata The EOD matrix from getEODMatrix
+plotAverage <- function(plotdata, verbose = F) {
+    if(verbose) {
+        cat('plotting average peak...\n')
+    }
 
+    ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
+}
 
-
+#' Plot all EOD signals
+#' @export
+#' @import ggplot2
+#'
+#' @param plotdata The EOD matrix from getEODMatrix
+plotTotal <- function(plotdata, alpha = 0.05, verbose = F) {
     mtitle = basename(filename)
     if(verbose) {
         cat('plotting average peak...\n')
     }
 
+    ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=alpha)
+}
+
+
+#' Plot all EOD signal with landmarks
+#' @export
+#' @import ggplot2
+#'
+#' @param plotdata The EOD matrix from getEODMatrix
+plotLandmarks <- function(plotdata, landmark_table, verbose = F) {
+    if(verbose) {
+        cat('plotting eod with landmarks\n')
+    }
+    ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1")
+}
+
+
+#' Plot EODs and find EOD statistics
+#' @export
+#' @import ggplot2
+#'
+#' @param filename The filename
+#' @param peaks A data.frame of peaks (time, direction +/-)
+#' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
+#' @param prebaseline Subtract baseline pre normalization
+#' @param postbaseline Subtract baseline post normalization
+#' @param normalize Normalize data to 0-1
+#' @param alpha Alpha channel for all EODs plot
+#' @param window Window size
+#' @param verbose Set verbose output
+plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
+    plotdata = getEODMatrix(filename, peaks, channel, prebaseline, postbaseline, normalize, alpha, window, verbose)
+    landmark_table = findLandmarks(plotdata)
+    stats = getStats(peaks, landmark_table)
+
+    write.csv(landmark_table, paste0(basename(filename), '.landmarks.csv'), quote=F, row.names=F)
+    write.csv(stats, paste0(basename(filename), '.stats.csv'), quote=F, row.names=F)
+
+    mtitle = basename(filename)
+
     png(paste0(basename(filename), '.average.png'), width=1000, height=600)
-    p = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle(mtitle)
-    print(p)
+    print(plotAverage(plotdata, verbose) + ggtitle(mtitle))
     dev.off()
 
-    if(verbose) {
-        cat('plotting total peak...\n')
-    }
     png(paste0(basename(filename), '.all.png'), width=1000, height=600)
-    p = ggplot(data=plotdata, aes(x=time, y=data, group=col)) + geom_line(alpha=alpha) + ggtitle(mtitle)
-    print(p)
+    print(plotTotal(plotdata, alpha, verbose) + ggtitle(mtitle))
     dev.off()
-
-    if(verbose) {
-        cat('plotting average peak (with landmarks)...\n')
-    }
 
     png(paste0(basename(filename), '.average.landmarks.png'), width=1000, height=600)
-    p = ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1") + ggtitle(mtitle)
-    print(p)
+    print(plotLandmarks(plotdata, landmark_table, verbose) + ggtitle(mtitle))
     dev.off()
 }

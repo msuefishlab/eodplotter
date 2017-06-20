@@ -4,7 +4,8 @@
 \alias{plotTdms}
 \title{Plot the signal vs time for a TDMS file}
 \usage{
-plotTdms(filename, channel, start = 0, end = NULL)
+plotTdms(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0,
+  end = NULL)
 }
 \arguments{
 \item{filename}{The filename}
