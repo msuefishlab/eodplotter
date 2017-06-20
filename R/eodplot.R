@@ -203,7 +203,6 @@ plotAverage <- function(plotdata, verbose = F) {
 #'
 #' @param plotdata The EOD matrix from getEODMatrix
 plotTotal <- function(plotdata, alpha = 0.05, verbose = F) {
-    mtitle = basename(filename)
     if(verbose) {
         cat('plotting average peak...\n')
     }
