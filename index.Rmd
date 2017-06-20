@@ -66,5 +66,46 @@ p = peakFinder('../tests/testthat/file.tdms')
 print(head(p))
 ```
 
+Get a matrix of EOD signal
+
+```{r}
+m = getEODMatrix('../tests/testthat/file.tdms', p)
+print(head(m))
+```
+
+Plot the matrix of EOD signals
+
+```{r}
+plotAverage(m)
+```
 
 
+
+Plot all the signals
+
+```{r}
+plotTotal(m)
+```
+
+
+
+Plot the matrix of EOD signals
+
+```{r}
+landmarks = findLandmarks(m)
+print(landmarks)
+```
+
+
+Plot the landmarks
+
+```{r}
+plotLandmarks(m, landmarks)
+```
+
+
+Get stats about the landmarks
+
+```{r}
+getStats(p, landmarks)
+```
