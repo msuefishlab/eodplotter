@@ -50,14 +50,21 @@ Once the library is installed, you can use it using either
 - Command line
 - On R interactive prompt
   
-### Using the command line
+### Usage
+
+Plot the raw signal of the data using plotTdms
 
 ```{r}
 library(eodplotter)
-print(getwd())
 plotTdms('../tests/testthat/file.tdms')
 ```
 
-### Using the R library directly
+Find peaks
 
-Todo
+```{r}
+p = peakFinder('../tests/testthat/file.tdms')
+print(head(p))
+```
+
+
+
