@@ -9,16 +9,17 @@
 
 ## ------------------------------------------------------------------------
 library(eodplotter)
+
+## ------------------------------------------------------------------------
 plotTdms('../tests/testthat/file.tdms')
 
 ## ------------------------------------------------------------------------
 p = peakFinder('../tests/testthat/file.tdms')
-library(xtable)
-xtable(head(p))
+print(head(p))
 
 ## ------------------------------------------------------------------------
-m = getEODMatrix('../tests/testthat/file.tdms', p)
-xtable(head(m))
+m = getEODMatrix('../tests/testthat/file.tdms', p, prebaseline=T)
+print(head(m))
 
 ## ------------------------------------------------------------------------
 plotAverage(m)
@@ -28,7 +29,7 @@ plotTotal(m)
 
 ## ------------------------------------------------------------------------
 landmarks = findLandmarks(m)
-xtable(landmarks)
+print(landmarks)
 
 ## ------------------------------------------------------------------------
 plotLandmarks(m, landmarks)
