@@ -56,14 +56,15 @@ Find peaks
 
 ```{r}
 p = peakFinder('../tests/testthat/file.tdms')
-print(head(p))
+library(xtable)
+xtable(head(p))
 ```
 
 Get a matrix of EOD signal
 
 ```{r}
 m = getEODMatrix('../tests/testthat/file.tdms', p)
-print(head(m))
+xtable(head(m))
 ```
 
 Plot the matrix of EOD signals
@@ -86,7 +87,7 @@ Plot the matrix of EOD signals
 
 ```{r}
 landmarks = findLandmarks(m)
-print(landmarks)
+xtable(landmarks)
 ```
 
 
@@ -104,7 +105,7 @@ getStats(p, landmarks)
 ```
 
 
-# Conclusion
+## Conclusion
 
 
-This demo shows you how to do a number of features using the `eodplotter` library
+This demo shows you how to use the `eodplotter` as an R library. Note that there is the alternative usage of the library using the command line as well, which can be more streamlined
