@@ -45,10 +45,16 @@ install_github('msuefishlab/eodplotter@0.0.2')
 ## Using EODPlotter
 
 
-Plot the raw signal of the data using plotTdms
+Load the library
 
 ```{r}
 library(eodplotter)
+```
+
+
+Plot the raw signal of the data using plotTdms
+
+```{r}
 plotTdms('../tests/testthat/file.tdms')
 ```
 
@@ -56,15 +62,14 @@ Find peaks
 
 ```{r}
 p = peakFinder('../tests/testthat/file.tdms')
-library(xtable)
-xtable(head(p))
+print(head(p))
 ```
 
 Get a matrix of EOD signal
 
 ```{r}
-m = getEODMatrix('../tests/testthat/file.tdms', p)
-xtable(head(m))
+m = getEODMatrix('../tests/testthat/file.tdms', p, prebaseline=T)
+print(head(m))
 ```
 
 Plot the matrix of EOD signals
@@ -87,7 +92,7 @@ Plot the matrix of EOD signals
 
 ```{r}
 landmarks = findLandmarks(m)
-xtable(landmarks)
+print(landmarks)
 ```
 
 
