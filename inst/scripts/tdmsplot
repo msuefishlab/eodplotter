@@ -3,6 +3,8 @@
 library(tdmsreader)
 library(eodplotter)
 
+options(bitmapType='cairo')
+
 suppressPackageStartupMessages(library("optparse"))
 parser <- OptionParser()
 parser <- add_option(parser, c("-f", "--file"), help="TDMS file input")
