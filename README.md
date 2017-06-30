@@ -21,3 +21,65 @@ Builds off the msuefishlab/tdmsreader. Also see msuefishlab/tdmsviewer
 ## User guide
 
 User guide/package vignette here: https://msuefishlab.github.io/eodplotter/index.html
+
+
+## Useful helpers for bulk processing
+
+Process all files in a folder, run e.g. process.sh ~/path/to/tdms/files/*.tdms
+
+```
+#!/usr/bin/env bash
+
+parallel "tdmsplot -f {}" ::: "$1"
+parallel "peak_finder -f {} -v" ::: "$1"
+parallel "eodplot -f {} -p {/}.peaks.csv" ::: "$1"
+```
+
+
+Combine CSVs script, run in directory full of csv's e.g. 'Rscript combine.r'
+
+```
+#!/usr/bin/env Rscript
+
+
+myfiles=list.files(pattern='*.stats.csv')
+print(myfiles)
+
+mycsvs = lapply(myfiles, read.csv)
+names(mycsvs)=myfiles
+print(mycsvs)
+
+
+for(i in 1:length(mycsvs)) {
+   mycsvs[[i]]$name = myfiles[i]
+}
+
+
+
+mytable = do.call(rbind, mycsvs)
+
+write.csv(mytable, 'combined.data.csv', quote=F,row.names=F)
+
+print('combined files into combined.data.csv')
+```
+
+
+
+Plot EOD amplitude from different experiments
+
+```
+library(stringr)
+library(lubridate)
+library(ggplot2)
+x=read.csv('combined.data.csv',stringsAsFactors=F)
+
+x$date=str_match(x$name,'(2017.*).tdms')[,2]
+x$trial=str_match(x$name,"([0-9]+)_")[,2]
+x$group=str_replace(tolower(str_match(x$name,'(MO.[a-zA-Z0-9]+)')[,2]), '_','')
+x$date=ymd_hms(x$date)
+
+
+png('test.png', width=1000,height=800)
+ggplot(x,aes(date,amplitude,color=group))+geom_line()
+dev.off()
+```
