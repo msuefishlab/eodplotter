@@ -16,7 +16,8 @@ Imports:
     optparse (>= 1.3.2),
     ggplot2 (>= 2.2.1),
     reshape2 (>= 1.4.2),
-    tdmsreader (>= 0.1.1)
+    tdmsreader (>= 0.1.1),
+    zoo (>= 1.8.0)
 Remotes: msuefishlab/tdmsreader
 License: MIT
 Encoding: UTF-8
