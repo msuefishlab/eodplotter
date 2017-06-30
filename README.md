@@ -25,7 +25,17 @@ User guide/package vignette here: https://msuefishlab.github.io/eodplotter/index
 
 ## Useful helpers for bulk processing
 
-Process all files in a folder, run e.g. process.sh ~/path/to/tdms/files/*.tdms
+
+### Add command line scripts to your path
+
+```
+export PATH=$PATH:`Rscript -e 'cat(paste0(.libPaths(),"/eodplotter/scripts",collapse=":"))'`:~/bin
+```
+
+
+### Process all files in a folder
+
+For example, save this script and run e.g. process.sh ~/path/to/tdms/files/*.tdms
 
 ```
 #!/usr/bin/env bash
@@ -36,7 +46,9 @@ parallel "eodplot -f {} -p {/}.peaks.csv" ::: "$1"
 ```
 
 
-Combine CSVs script, run in directory full of csv's e.g. 'Rscript combine.r'
+### Combine all stats.csv
+
+Run this script in directory full of stats.csv files e.g. 'Rscript combine.r'
 
 ```
 #!/usr/bin/env Rscript
@@ -65,7 +77,7 @@ print('combined files into combined.data.csv')
 
 
 
-Plot EOD amplitude from different experiments
+### Plot EOD amplitude from different experiments
 
 ```
 library(stringr)
