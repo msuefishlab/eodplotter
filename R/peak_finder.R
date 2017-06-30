@@ -29,16 +29,18 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
     dat = r$data
     close(m)
 
-    mysd = sd(dat)
-    mymean = mean(dat)
+    #mysd = sd(dat)
+    #mymean = mean(dat)
     currTime = 0
 
     if(verbose) {
         cat(sprintf("finding peaks for %s\n", filename))
     }
     peaks = data.frame(peaks=numeric(), direction=character(), stringsAsFactors=F)
-    for(i in seq(1,length(dat),by=3)) {
+    for(i in seq(1001,length(dat)-1000,by=3)) {
         ns = max(i - 1000,1)
+        mymean=mean(dat[(i-1000):(i+1000)],na.rm=T)
+        mysd=sd(dat[(i-1000):(i+1000)],na.rm=T)
         ne = i + 1000
         
         if(verbose & i%%100000==0) {
