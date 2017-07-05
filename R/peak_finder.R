@@ -31,6 +31,7 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
     close(m)
 
     mysd = sd(dat)
+    allmean = mean(dat)
     currTime = 0
 
     if(verbose) {
@@ -43,24 +44,25 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
         ns = max(i - 1000,1)
         mymean=mymeans[i-5000]
         ne = i + 1000
-        
-        if(verbose & i%%100000==0) {
-            cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
-        }
-        if(t[i] - currTime > 0.001) {
-            if(dat[i] > mymean + mysd * threshold) {
-                loc_max = which.max(dat[ns:ne])
-                loc_min = which.min(dat[ns:ne])
-                if(loc_min>=loc_max) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+',stringsAsFactors=F))
-                    currTime = t[i]
-                }
-            } else if(dat[i] < mymean - mysd * threshold) {
-                loc_max = which.max(dat[ns:ne])
-                loc_min = which.min(dat[ns:ne])
-                if(loc_max>=loc_min) {
-                    peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-',stringsAsFactors=F))
-                    currTime = t[i]
+        if(mymean < allmean + mysd*threshold) {
+            if(verbose & i%%100000==0) {
+                cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
+            }
+            if(t[i] - currTime > 0.001) {
+                if(dat[i] > mymean + mysd * threshold) {
+                    loc_max = which.max(dat[ns:ne])
+                    loc_min = which.min(dat[ns:ne])
+                    if(loc_min>=loc_max) {
+                        peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+',stringsAsFactors=F))
+                        currTime = t[i]
+                    }
+                } else if(dat[i] < mymean - mysd * threshold) {
+                    loc_max = which.max(dat[ns:ne])
+                    loc_min = which.min(dat[ns:ne])
+                    if(loc_max>=loc_min) {
+                        peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-',stringsAsFactors=F))
+                        currTime = t[i]
+                    }
                 }
             }
         }
