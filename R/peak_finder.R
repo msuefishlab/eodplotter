@@ -44,7 +44,7 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
         ns = max(i - 1000,1)
         mymean=mymeans[i-5000]
         ne = i + 1000
-        if(mymean < allmean + mysd*threshold) {
+        if(abs(mymean - allmean) < mysd) {
             if(verbose & i%%100000==0) {
                 cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
             }
