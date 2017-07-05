@@ -79,6 +79,14 @@ print('combined files into combined.data.csv')
 
 ### Plot EOD amplitude from different experiments
 
+This will plot the amplitude from multiple experiments where it assumes some particular file naming conventions e.g. 
+
+1_MOCntrl1_Baseline_2017_06_29_07_34_08.tdms
+2_MOCntrl1_30_2017_06_29_08_21_23.tdms
+3_MOCntrl1_60_2017_06_29_09_00_21.tdms
+
+Generic pattern <number>_MO<experimentname>_minutes_timestamp.tdms
+
 ```
 library(stringr)
 library(lubridate)
@@ -91,7 +99,9 @@ x$group=str_replace(tolower(str_match(x$name,'(MO.[a-zA-Z0-9]+)')[,2]), '_','')
 x$date=ymd_hms(x$date)
 
 
-png('test.png', width=1000,height=800)
+png('combined.fixed.png', width=1000,height=800)
 ggplot(x,aes(date,amplitude,color=group))+geom_line()
 dev.off()
+
+write.csv(x, 'combined.fixed.csv',row.names=F,quote=F)
 ```
