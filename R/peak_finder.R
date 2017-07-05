@@ -25,13 +25,13 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
     }
     total_vals = r$number_values * r$properties[['wf_increment']]
     s = 0
-    e = total_values
+    e = total_vals
     if(!is.null(remove)) {
         e = e - remove
         s = s + remove
     } else {
-        e = is.null(end) ? total_vals : end
-        s = is.null(start) ? 0 : start
+        e = ifelse(is.null(end), e, end)
+        s = ifelse(is.null(start), 0, start)
     }
 
     main$read_data(m, s, e)
