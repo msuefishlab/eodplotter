@@ -10,9 +10,11 @@ library(tdmsreader)
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
 #' @param direction Only get positive or negative peaks
 #' @param threshold Threshold for cutoff
-#' @param remove Remove N seconds from start and end of recording
+#' @param remove Remove N seconds from start and end of recording, mutually exclusive to start/end
+#' @param start Start of rec, mutually exclusive to remove
+#' @param end End of rec
 #' @param verbose Verbose output
-peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="none", threshold=5, remove=0, verbose=F) {
+peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="none", threshold=5, start=NULL, end=NULL, remove = NULL, verbose=F) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
 
@@ -22,8 +24,15 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
         stop('Channel not found')
     }
     total_vals = r$number_values * r$properties[['wf_increment']]
-    e = total_vals - remove
-    s = remove
+    s = 0
+    e = total_values
+    if(!is.null(remove)) {
+        e = e - remove
+        s = s + remove
+    } else {
+        e = is.null(end) ? total_vals : end
+        s = is.null(start) ? 0 : start
+    }
 
     main$read_data(m, s, e)
     t = r$time_track(start = s, end = e)

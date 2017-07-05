@@ -10,6 +10,8 @@ parser <- add_option(parser, c('-v', '--verbose'), default=F, type="logical", ac
 parser <- add_option(parser, c('-c', '--channel'), default="/'Untitled'/'Dev1/ai0'", help='Channel name')
 parser <- add_option(parser, c('-n', '--number'), type="double", default=5, help='Peak finder threshold, sigma or voltage threshold')
 parser <- add_option(parser, c('-d', '--direction'), default = "none", help='Direction, enter either positive/negative/none')
+parser <- add_option(parser, c('-s', '--start'), default = 0, type="double", help="Start time")
+parser <- add_option(parser, c('-e', '--end'), default = 0, type="double", help="End time")
 parser <- add_option(parser, c('-r', '--remove'), default = 0, type="double", help="Amount to remove from start/end of recording")
 
 options = commandArgs(trailingOnly = TRUE)
@@ -23,7 +25,9 @@ if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
 
-p=peakFinder(opts$file, channel = opts$channel, threshold = opts$number, direction = opts$direction, remove = opts$remove, verbose = opts$verbose)
+
+
+p=peakFinder(opts$file, channel = opts$channel, threshold = opts$number, direction = opts$direction, remove = opts$remove, start = opts$start, end = opts$end, verbose = opts$verbose)
 write.csv(p, file=paste0(basename(opts$file),'.peaks.csv'), quote=F, row.names=F)
 
 
