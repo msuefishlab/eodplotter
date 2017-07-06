@@ -127,3 +127,19 @@ invisible(dev.off())
 
 write.csv(ret, 'combined.fixed.csv', row.names = F, quote = F)
 ```
+
+
+### MultiEodPlotter pipeline
+
+Output a list of peaks and tdms files and combine them for the input into multieodplot
+
+```
+ls -1 *exp2_*.peaks.csv > peaks.csv; 
+ls -1 *exp2_*.tdms > tdms.csv;
+paste -d',' tdms.csv peaks.csv > file.csv
+multieodplot -f file.csv -b
+```
+
+
+
+
