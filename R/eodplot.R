@@ -251,15 +251,12 @@ plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebase
 
     mtitle = basename(filename)
 
-    png(paste0(basename(filename), '.average.png'), width=1000, height=600)
-    suppressWarnings(print(plotAverage(plotdata, verbose) + ggtitle(mtitle)))
-    dev.off()
+    plotAverage(plotdata, verbose) + ggtitle(mtitle)
+    ggsave(paste0(basename(filename), '.average.png'))
 
-    png(paste0(basename(filename), '.all.png'), width=1000, height=600)
-    suppressWarnings(print(plotTotal(plotdata, alpha, verbose) + ggtitle(mtitle)))
-    dev.off()
+    plotTotal(plotdata, alpha, verbose) + ggtitle(mtitle)
+    ggsave(paste0(basename(filename), '.all.png'))
 
-    png(paste0(basename(filename), '.average.landmarks.png'), width=1000, height=600)
-    suppressWarnings(print(plotLandmarks(plotdata, landmark_table, verbose) + ggtitle(mtitle)))
-    dev.off()
+    plotLandmarks(plotdata, landmark_table, verbose) + ggtitle(mtitle)
+    ggsave(paste0(basename(filename), '.average.landmarks.png'))
 }

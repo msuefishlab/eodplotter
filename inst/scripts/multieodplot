@@ -27,8 +27,7 @@ if (is.null(opts$file)) {
 if (!file.exists(opts$file)) {
     stop('TDMS file not found')
 }
-peaksets = read.csv(opts$file)
-print(opts$all)
+peaksets = read.csv(opts$file,stringsAsFactors=F)
 totalplotdata = lapply(1:nrow(peaksets), function(i) {
     f = peaksets[i,1][[1]]
     p = peaksets[i,2][[1]]
@@ -87,27 +86,15 @@ if(opts$verbose) {
 }
 
 totalplotdata = do.call(rbind, totalplotdata)
-
-if(opts$pdf) {
-    pdf('alltdms.average.pdf', width=20,height=9)
-} else {
-    png('alltdms.average.png', width=2000, height=900)
-}
-myplot = ggplot(data=totalplotdata, aes(x=time, y=data, color = filename, group = filename)) + stat_summary(aes(y = data), fun.y=mean, geom='line')
-myplot + ggtitle('Averaged peak data')
-invisible(dev.off())
+ext = ifelse(opts$pdf, 'pdf', 'png')
+ggplot(data=totalplotdata, aes(x=time, y=data, color = filename, group = filename)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + ggtitle('Averaged peak data')
+ggsave(paste0('alltdms.average.',ext), width=20)
 
 print(opts$all)
 if(opts$all) {
     if(opts$verbose) {
         print('plotting total peak...')
     }
-    if(opts$pdf) {
-        pdf('alltdms.all.pdf', width=20,height=9)
-    } else {
-        png('alltdms.all.png', width=2000, height=900)
-    }
-    myplot2 = ggplot(data=totalplotdata, aes(x=time, y=data, group = col, color=filename)) + geom_line(alpha=opts$alpha) + guides(colour = guide_legend(override.aes = list(alpha=1)))
-    myplot2 + ggtitle('Total peak data')
-    invisible(dev.off())
+    ggplot(data=totalplotdata, aes(x=time, y=data, group = col, color=filename)) + geom_line(alpha=opts$alpha) + guides(colour = guide_legend(override.aes = list(alpha=1))) + ggtitle('Total peak data')
+    ggsave(paste0('alltdms.png',ext), width=20)
 }
