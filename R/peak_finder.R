@@ -15,7 +15,7 @@ library(tdmsreader)
 #' @param end End of rec
 #' @param verbose Verbose output
 #' @param progressCallback Callback for progress event update
-peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="none", threshold=5, start=NULL, end=NULL, remove = NULL, verbose=F, progressCallback=NULL) {
+peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction = "none", threshold = 5, start = NULL, end = NULL, remove = NULL, verbose = F, progressCallback = NULL) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
 
@@ -48,32 +48,33 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
         cat(sprintf("finding peaks for %s\n", filename))
     }
     peaks = data.frame(peaks=numeric(), direction=character(), stringsAsFactors=F)
-    mymeans=rollmean(dat, 5000)
+    mymeans = rollmean(dat, 5000)
 
-    for(i in seq(5001,length(dat)-5000,by=3)) {
+    for(i in seq(5001, length(dat) - 5000, by = 3)) {
         ns = max(i - 1000,1)
-        mymean=mymeans[i-5000]
+        mymean=mymeans[i - 5000]
         ne = i + 1000
         if(abs(mymean - allmean) < mysd) {
-            if(verbose & i%%100000==0) {
-                cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
-                if(!is.null(progressCallback)) {
-                    progressCallback(round(100*i/length(dat)))
-                }
+            xcee = round(100 * i / length(dat))
+            if(verbose & i %% 100000 == 0) {
+                cat(sprintf("\rprogress %d%%",xcee))
+            }
+            if(!is.null(progressCallback)) {
+                progressCallback(xcee)
             }
             if(t[i] - currTime > 0.001) {
                 if(dat[i] > mymean + mysd * threshold) {
                     loc_max = which.max(dat[ns:ne])
                     loc_min = which.min(dat[ns:ne])
-                    if(loc_min>=loc_max) {
-                        peaks = rbind(peaks, data.frame(peaks=t[ns + loc_max], direction='+',stringsAsFactors=F))
+                    if(loc_min >= loc_max) {
+                        peaks = rbind(peaks, data.frame(peaks = t[ns + loc_max], direction = '+', stringsAsFactors = F))
                         currTime = t[i]
                     }
                 } else if(dat[i] < mymean - mysd * threshold) {
                     loc_max = which.max(dat[ns:ne])
                     loc_min = which.min(dat[ns:ne])
-                    if(loc_max>=loc_min) {
-                        peaks = rbind(peaks, data.frame(peaks=t[ns + loc_min], direction='-',stringsAsFactors=F))
+                    if(loc_max >= loc_min) {
+                        peaks = rbind(peaks, data.frame(peaks = t[ns + loc_min], direction = '-', stringsAsFactors = F))
                         currTime = t[i]
                     }
                 }
@@ -85,7 +86,7 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
         cat("\r", sprintf("progress 100%%\n"))
         cat("done scanning\n")
     }
-    if(nrow(peaks)==0) {
+    if(nrow(peaks) == 0) {
         cat(sprintf('No peaks found in %s\n', filename))
     }
     peaks
