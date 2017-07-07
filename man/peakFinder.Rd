@@ -5,7 +5,8 @@
 \title{Find peaks from a TDMS file}
 \usage{
 peakFinder(filename, channel = "/'Untitled'/'Dev1/ai0'", direction = "none",
-  threshold = 5, remove = 0, verbose = F)
+  threshold = 5, start = NULL, end = NULL, remove = NULL, verbose = F,
+  progressCallback = NULL)
 }
 \arguments{
 \item{filename}{The filename}
@@ -16,9 +17,15 @@ peakFinder(filename, channel = "/'Untitled'/'Dev1/ai0'", direction = "none",
 
 \item{threshold}{Threshold for cutoff}
 
-\item{remove}{Remove N seconds from start and end of recording}
+\item{start}{Start of rec, mutually exclusive to remove}
+
+\item{end}{End of rec}
+
+\item{remove}{Remove N seconds from start and end of recording, mutually exclusive to start/end}
 
 \item{verbose}{Verbose output}
+
+\item{progressCallback}{Callback for progress event update}
 }
 \description{
 Find peaks from a TDMS file

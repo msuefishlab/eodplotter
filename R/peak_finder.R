@@ -51,16 +51,17 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction = "
     mymeans = rollmean(dat, 5000)
 
     for(i in seq(5001, length(dat) - 5000, by = 3)) {
-        ns = max(i - 1000,1)
-        mymean=mymeans[i - 5000]
+        ns = max(i - 1000, 1)
+        mymean = mymeans[i]
         ne = i + 1000
         if(abs(mymean - allmean) < mysd) {
-            xcee = round(100 * i / length(dat))
-            if(verbose & i %% 100000 == 0) {
-                cat(sprintf("\rprogress %d%%",xcee))
-            }
-            if(!is.null(progressCallback)) {
-                progressCallback(xcee)
+            if(i %% 100000 == 0) {
+                if(verbose) {
+                    cat(sprintf("\rprogress %d%%", round(100 * i / length(dat))))
+                }
+                if(!is.null(progressCallback)) {
+                    progressCallback(i / length(dat))
+                }
             }
             if(t[i] - currTime > 0.001) {
                 if(dat[i] > mymean + mysd * threshold) {
