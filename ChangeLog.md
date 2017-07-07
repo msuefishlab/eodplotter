@@ -1,7 +1,7 @@
 ## Version 0.0.3
 
 - Control for signal spikes that are not EODs in the peak finder
-
+- Add progress callback
 
 ## Version 0.0.2
 

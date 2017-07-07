@@ -14,7 +14,8 @@ library(tdmsreader)
 #' @param start Start of rec, mutually exclusive to remove
 #' @param end End of rec
 #' @param verbose Verbose output
-peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="none", threshold=5, start=NULL, end=NULL, remove = NULL, verbose=F) {
+#' @param progressCallback Callback for progress event update
+peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="none", threshold=5, start=NULL, end=NULL, remove = NULL, verbose=F, progressCallback=NULL) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
 
@@ -56,6 +57,9 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction="no
         if(abs(mymean - allmean) < mysd) {
             if(verbose & i%%100000==0) {
                 cat(sprintf("\rprogress %d%%",round(100*i/length(dat))))
+                if(!is.null(progressCallback)) {
+                    progressCallback(round(100*i/length(dat)))
+                }
             }
             if(t[i] - currTime > 0.001) {
                 if(dat[i] > mymean + mysd * threshold) {
