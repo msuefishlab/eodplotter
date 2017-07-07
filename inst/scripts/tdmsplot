@@ -2,8 +2,7 @@
 
 library(tdmsreader)
 library(eodplotter)
-
-options(bitmapType='cairo')
+library(ggplot2)
 
 suppressPackageStartupMessages(library("optparse"))
 parser <- OptionParser()
@@ -24,6 +23,5 @@ if (!file.exists(opts$file)) {
     stop('File not found')
 }
 
-png(paste0(basename(opts$file),'.signal.png'), width=2000, height=900)
 plotTdms(opts$file, opts$channel, opts$start, opts$end)
-invisible(dev.off())
+ggsave(paste0(basename(opts$file), '.signal.png'), width=20)

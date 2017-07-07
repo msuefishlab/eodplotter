@@ -24,18 +24,14 @@ plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, en
     t = r$time_track(start = s, end = e)
     dat = r$data
     close(m)
+    
     if(e - s > 20) {
         dat = dat[seq(1, length(dat), by = 10)]
         t = t[seq(1, length(t), by = 10)]
-        dat = dat[1:length(t)]
-        plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
     } else if(e - s > 10) {
         dat = dat[seq(1, length(dat), by = 5)]
         t = t[seq(1, length(t), by = 5)]
-        dat = dat[1:length(t)]
-        plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
-    } else {
-        plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
     }
-    title(filename)
+    dat = dat[1:length(t)]
+    ggplot(data.frame(time = t, volts = dat), aes(t, dat)) + geom_line(alpha = 0.5) + ggtitle(filename)
 }

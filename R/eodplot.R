@@ -16,6 +16,10 @@ library(tdmsreader)
 #' @param window Window size
 #' @param verbose Set verbose output
 getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
+    if(nrow(peaks)==0) {
+        print('No peaks found')
+        return(NULL)
+    }
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
     c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
@@ -75,6 +79,7 @@ findLandmarks <- function(plotdata) {
     avg = apply(ret, 1, mean)
     avg = avg[1:(length(avg)-1)]
     data = data.frame(time = as.numeric(names(avg)), val = as.numeric(avg))
+    data = data[1:nrow(data)-1,]
     p1pos = which.max(data$val)
     p1 = data[p1pos, ]
     p1_e = plotdata[p1$time == plotdata$time,]
@@ -118,9 +123,12 @@ findLandmarks <- function(plotdata) {
         if(rightside[i, 'val'] > baseline - 0.02 * (p1$val - p2$val)) {
             t2 = rightside[i,]
             t2_e = plotdata[t2$time==plotdata$time, ]
-
             break
         }
+    }
+    if(is.null(t2)) {
+        t2 = rightside[20,]
+        t2_e = plotdata[t2$time==plotdata$time, ]
     }
 
     slope1_max = -100000
@@ -242,8 +250,15 @@ plotLandmarks <- function(plotdata, landmark_table, verbose = F) {
 #' @param window Window size
 #' @param verbose Set verbose output
 plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebaseline = F, postbaseline = F, normalize = F, alpha = F, window = 0.005, verbose = F) {
+    if(nrow(peaks)==0) {
+        print('No peaks found')
+        return(NULL)
+    }
     plotdata = getEODMatrix(filename, peaks, channel, prebaseline, postbaseline, normalize, alpha, window, verbose)
     landmark_table = findLandmarks(plotdata)
+    if(verbose) {
+        print(landmark_table)
+    }
     stats = getStats(peaks, landmark_table)
 
     write.csv(landmark_table, paste0(basename(filename), '.landmarks.csv'), quote=F, row.names=F)
