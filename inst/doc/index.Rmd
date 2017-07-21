@@ -40,9 +40,73 @@ To install a specific version, e.g. the version mentioned in this guide, you
 can also run
 
 ```{r,eval=F}
-install_github('msuefishlab/eodplotter@0.0.2')
+install_github('msuefishlab/eodplotter@0.0.3')
 ```
-## Using EODPlotter
+
+#### Important for command line usage
+
+Also add this to your .bash_profile to add the Rscripts to your command line path:
+
+```
+export PATH=$PATH:`Rscript -e 'cat(paste0(.libPaths(),"/eodplotter/scripts",collapse=":"))'`:~/bin
+```
+
+
+
+## Using EODPlotter as a command line tool
+
+### Process a TDMS file
+
+
+```
+# plots the raw signal as a graph, use to diagnose signal problems
+tdmsplot -f file.tdms
+# finds all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)
+peak_finder -f file.tdms -v
+# analyze the signal and the peaks to produce output files
+eodplot -f file.tdms -p file.peaks.csv
+```
+
+
+### Reference
+
+#### `tdmsplot`
+
+```
+tdmsplot
+Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/tdmsplot [options]
+
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS file input
+
+    -v VERBOSE, --verbose=VERBOSE
+        Print verbose output
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -s START, --start=START
+        Start time
+
+    -e END, --end=END
+        End time
+```
+
+Outputs a file.signal.png file representing the raw signal values of the EODs
+
+#### `peak_finder`
+
+```
+Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/peak_finder [options]
+
+## Using EODPlotter as an R library
+
+
 
 
 Load the library
