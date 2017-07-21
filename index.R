@@ -5,7 +5,7 @@
 #  devtools::install_github('msuefishlab/eodplotter')
 
 ## ----eval=F--------------------------------------------------------------
-#  install_github('msuefishlab/eodplotter@0.0.3')
+#  install_github('msuefishlab/eodplotter@0.0.4')
 
 ## ------------------------------------------------------------------------
 library(eodplotter)

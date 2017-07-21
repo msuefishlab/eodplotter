@@ -44,7 +44,7 @@ To install a specific version, e.g. the version mentioned in this guide, you
 can also run
 
 ```{r,eval=F}
-install_github('msuefishlab/eodplotter@0.0.3')
+install_github('msuefishlab/eodplotter@0.0.4')
 ```
 
 
