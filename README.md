@@ -15,21 +15,11 @@ User guide: https://msuefishlab.github.io/eodplotter/index.html
 
 ## Notes
 
-Builds off the msuefishlab/tdmsreader. Also see msuefishlab/tdmsviewer
+Builds off the https://github.com/msuefishlab/tdmsreader. Also see https://github.com/msuefishlab/tdmsviewer
 
 
 ## User guide
 
 User guide/package vignette here: https://msuefishlab.github.io/eodplotter/index.html
-
-
-## Useful helpers for bulk processing
-
-
-### Add command line scripts to your path
-
-```
-export PATH=$PATH:`Rscript -e 'cat(paste0(.libPaths(),"/eodplotter/scripts",collapse=":"))'`:~/bin
-```
 
 

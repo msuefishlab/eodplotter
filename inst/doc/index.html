@@ -242,180 +242,35 @@ can also run</p>
 
 <h3>Process a TDMS file</h3>
 
-<pre><code># plots the raw signal as a graph, use to diagnose signal problems
-tdmsplot -f file.tdms
-# finds all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)
-peak_finder -f file.tdms -v
-# analyze the signal and the peaks to produce output files
-eodplot -f file.tdms -p file.peaks.csv
+<p>First try using the <code>tdmsplot</code> command, it plots the raw signal as a graph, use to diagnose signal problems</p>
+
+<pre><code>tdmsplot -f file.tdms
 </code></pre>
 
-<h3>Reference</h3>
+<p>Then use <code>peak_finder</code> to find all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)</p>
 
-<h4><code>tdmsplot</code></h4>
-
-<pre><code>tdmsplot
-Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/tdmsplot [options]
-
-
-Options:
-    -h, --help
-        Show this help message and exit
-
-    -f FILE, --file=FILE
-        TDMS file input
-
-    -v VERBOSE, --verbose=VERBOSE
-        Print verbose output
-
-    -c CHANNEL, --channel=CHANNEL
-        Channel name
-
-    -s START, --start=START
-        Start time
-
-    -e END, --end=END
-        End time
+<pre><code>peak_finder -f file.tdms -v
 </code></pre>
 
-<p>Outputs a file.signal.png file representing the raw signal values of the EODs</p>
+<p>Finally analyze the signal and the peaks to produce output files</p>
 
-<h4><code>peak_finder</code></h4>
-
-<pre><code>Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/peak_finder [options]
-
-Options:
-    -h, --help
-        Show this help message and exit
-
-    -f FILE, --file=FILE
-        TDMS file input
-
-    -v, --verbose
-        Print verbose output
-
-    -c CHANNEL, --channel=CHANNEL
-        Channel name
-
-    -n NUMBER, --number=NUMBER
-        Peak finder threshold, sigma or voltage threshold
-
-    -d DIRECTION, --direction=DIRECTION
-        Direction, enter either positive/negative/none
-
-    -s START, --start=START
-        Start time
-
-    -e END, --end=END
-        End time
-
-    -r REMOVE, --remove=REMOVE
-        Amount to remove from start/end of recording
+<pre><code>eodplot -f file.tdms -p file.peaks.csv
 </code></pre>
 
-<p>Outputs a file.peaks.png file representing the timepoints where EODs were detected in the TDMS file</p>
-
-<h4><code>eodplot</code></h4>
-
-<pre><code>Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/eodplot [options]
-
-
-Options:
-    -h, --help
-        Show this help message and exit
-
-    -f FILE, --file=FILE
-        TDMS file input
-
-    -p PEAK, --peak=PEAK
-        Peak file input
-
-    -v, --verbose
-        Print verbose output
-
-    -c CHANNEL, --channel=CHANNEL
-        Channel name
-
-    -w WINDOW, --window=WINDOW
-        Window size around peak value
-
-    -b, --prebaseline
-        Pre-normalization baseline subtract
-
-    -d, --postbaseline
-        Post-normalization baseline subtract
-
-    -n, --normalize
-        Normalize waveform between 0-1 peak to peak height
-
-    -a ALPHA, --alpha=ALPHA
-        Alpha channel for individual peaks
-
-</code></pre>
-
-<p>Outputs a bunch of files completing the analysis</p>
+<p>After running these commands you will have a number of files</p>
 
 <ul>
-<li>file.all.png - a visualization of all EOD signal traces</li>
-<li>file.average.png - the average EOD waveform</li>
-<li>file.average.landmarks.png - the average EOD waveform with landmarks plotted</li>
-<li>file.landmarks.csv - the data on the landmarks detected</li>
-<li>file.stats.csv - the data on duration, amplitude, and number of EODs detected</li>
+<li>file.signal.png</li>
+<li>file.average.landmarks.png</li>
+<li>file.average.png</li>
+<li>file.all.png</li>
+<li>file.stats.csv</li>
+<li>file.landmarks.csv</li>
 </ul>
 
-<h4><code>multieodplot</code></h4>
+<p>Where file is the prefix of your TDMS file that you analyzed e.g. if it was fish123.tdms, then you would have fish123.stats.csv.</p>
 
-<pre><code>Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/multieodplot [options]
-
-
-Options:
-    -h, --help
-        Show this help message and exit
-
-    -f FILE, --file=FILE
-        TDMS/Peak file table
-
-    -c CHANNEL, --channel=CHANNEL
-        Channel name
-
-    -w WINDOW, --window=WINDOW
-        Window size around peak value
-
-    -v, --verbose
-        Print verbose output
-
-    -b, --prebaseline
-        Pre-normalization baseline subtract
-
-    -d, --postbaseline
-        Post-normalization baseline subtract
-
-    -n, --normalize
-        Normalize waveform between 0-1 peak to peak height
-
-    -a ALPHA, --alpha=ALPHA
-        Transparency factor aka alpha channel for plotting EODs
-
-    -p, --pdf
-        Use PDF output
-
-    -A, --all
-        Plot all traces
-</code></pre>
-
-<h2>Sample command line analysis</h2>
-
-<h3>Process a single TDMS file</h3>
-
-<pre><code># get the raw signal trace
-tdmsplot -f file.tdms
-
-# find EODs and output verbose
-peak_finder -f file.tdms -v
-
-# get stats about the EODs
-eodplot -f file.tdms
-</code></pre>
+<p>The file.stats.csv file contains useful information on duration and amplitude, and also number of EODs measured. Other files can be used for diagnosing issues with the analysis</p>
 
 <h3>Process all files in parallel</h3>
 
@@ -580,6 +435,159 @@ print(landmarks)
 
 <pre><code>##   amplitude duration total_eods
 ## 1 0.4359556  0.00249        139
+</code></pre>
+
+<h3>Command line reference</h3>
+
+<h4><code>tdmsplot</code></h4>
+
+<pre><code>tdmsplot
+Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/tdmsplot [options]
+
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS file input
+
+    -v VERBOSE, --verbose=VERBOSE
+        Print verbose output
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -s START, --start=START
+        Start time
+
+    -e END, --end=END
+        End time
+</code></pre>
+
+<p>Outputs a file.signal.png file representing the raw signal values of the EODs</p>
+
+<h4><code>peak_finder</code></h4>
+
+<pre><code>Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/peak_finder [options]
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS file input
+
+    -v, --verbose
+        Print verbose output
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -n NUMBER, --number=NUMBER
+        Peak finder threshold, sigma or voltage threshold
+
+    -d DIRECTION, --direction=DIRECTION
+        Direction, enter either positive/negative/none
+
+    -s START, --start=START
+        Start time
+
+    -e END, --end=END
+        End time
+
+    -r REMOVE, --remove=REMOVE
+        Amount to remove from start/end of recording
+</code></pre>
+
+<p>Outputs a file.peaks.png file representing the timepoints where EODs were detected in the TDMS file</p>
+
+<h4><code>eodplot</code></h4>
+
+<pre><code>Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/eodplot [options]
+
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS file input
+
+    -p PEAK, --peak=PEAK
+        Peak file input
+
+    -v, --verbose
+        Print verbose output
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -w WINDOW, --window=WINDOW
+        Window size around peak value
+
+    -b, --prebaseline
+        Pre-normalization baseline subtract
+
+    -d, --postbaseline
+        Post-normalization baseline subtract
+
+    -n, --normalize
+        Normalize waveform between 0-1 peak to peak height
+
+    -a ALPHA, --alpha=ALPHA
+        Alpha channel for individual peaks
+
+</code></pre>
+
+<p>Outputs a bunch of files completing the analysis</p>
+
+<ul>
+<li>file.all.png - a visualization of all EOD signal traces</li>
+<li>file.average.png - the average EOD waveform</li>
+<li>file.average.landmarks.png - the average EOD waveform with landmarks plotted</li>
+<li>file.landmarks.csv - the data on the landmarks detected</li>
+<li>file.stats.csv - the data on duration, amplitude, and number of EODs detected</li>
+</ul>
+
+<h4><code>multieodplot</code></h4>
+
+<pre><code>Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/multieodplot [options]
+
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS/Peak file table
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -w WINDOW, --window=WINDOW
+        Window size around peak value
+
+    -v, --verbose
+        Print verbose output
+
+    -b, --prebaseline
+        Pre-normalization baseline subtract
+
+    -d, --postbaseline
+        Post-normalization baseline subtract
+
+    -n, --normalize
+        Normalize waveform between 0-1 peak to peak height
+
+    -a ALPHA, --alpha=ALPHA
+        Transparency factor aka alpha channel for plotting EODs
+
+    -p, --pdf
+        Use PDF output
+
+    -A, --all
+        Plot all traces
 </code></pre>
 
 <h2>Conclusion</h2>

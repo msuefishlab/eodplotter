@@ -6,11 +6,6 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEncoding{UTF-8}
-output:
-  rmarkdown::html_document:
-      theme: lumen
-      toc: true
-          toc_depth: 2
 ---
 
 
@@ -62,17 +57,190 @@ export PATH=$PATH:`Rscript -e 'cat(paste0(.libPaths(),"/eodplotter/scripts",coll
 ### Process a TDMS file
 
 
+First try using the `tdmsplot` command, it plots the raw signal as a graph, use to diagnose signal problems
 ```
-# plots the raw signal as a graph, use to diagnose signal problems
 tdmsplot -f file.tdms
-# finds all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)
+```
+
+
+Then use `peak_finder` to find all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)
+
+```
 peak_finder -f file.tdms -v
-# analyze the signal and the peaks to produce output files
+```
+
+Finally analyze the signal and the peaks to produce output files
+
+```
 eodplot -f file.tdms -p file.peaks.csv
 ```
 
 
-### Reference
+After running these commands you will have a number of files
+
+- file.signal.png
+- file.average.landmarks.png
+- file.average.png
+- file.all.png
+- file.stats.csv
+- file.landmarks.csv
+
+Where file is the prefix of your TDMS file that you analyzed e.g. if it was fish123.tdms, then you would have fish123.stats.csv.
+
+The file.stats.csv file contains useful information on duration and amplitude, and also number of EODs measured. Other files can be used for diagnosing issues with the analysis
+
+
+### Process all files in parallel
+
+
+For example, save this script and run e.g. process.sh ~/path/to/tdms/files/*.tdms
+
+
+```
+parallel "tdmsplot -f {}" ::: /path/to/files/*.tdms
+parallel "peak_finder -f {} -v" ::: /path/to/files/*.tdms
+parallel "eodplot -f {} -p {/}.peaks.csv" ::: /path/to/files/*.tdms
+```
+
+
+### Combine all stats.csv
+
+A helper script called combine_stats is added so after processing many TDMS files, simply run
+
+```
+combine_stats
+```
+
+This will output a combined stats file
+
+
+### Summarize EOD results from different experiments
+
+If you have different experiments with different timepoints and you want to compare them all then this script is an example of something you could try
+
+This will plot the amplitude from multiple experiments where it assumes some particular file naming conventions e.g. 
+
+- 1_MOCntrl1_Baseline_2017_06_29_07_34_08.tdms
+- 2_MOCntrl1_30_2017_06_29_08_21_23.tdms
+- 3_MOCntrl1_60_2017_06_29_09_00_21.tdms
+
+Generic pattern `<number>_MO<experimentname>_minutes_timestamp.tdms`
+
+```
+library(stringr)
+library(ggplot2)
+suppressMessages(library(lubridate))
+combined=read.csv('combined.data.csv',stringsAsFactors=F)
+
+l = str_split(substr(combined$name,0,str_locate(combined$name,'2017')[,1]-2),'_')
+combined$trial = as.numeric(sapply(l,function(r) r[1]))
+combined$group = tolower(sapply(l,function(r) r[2]))
+m = sapply(l, function(r) r[3])
+m[m == 'Baseline'] = 0
+combined$timepoint = as.numeric(m)
+combined$date = ymd_hms(str_replace(substring(combined$name, str_locate(combined$name,'2017')[,1]), '.tdms.stats.csv',''))
+ 
+png('combined.fixed.png', width=1000,height=800)
+ggplot(combined, aes(timepoint, amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Peak-to-peak amplitude") +scale_colour_brewer(palette="Set2")
+invisible(dev.off())
+pdf('combined.fixed.pdf', width=11,height=8)
+ggplot(combined, aes(timepoint, amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Peak-to-peak amplitude") +scale_colour_brewer(palette="Set2")
+invisible(dev.off())
+
+
+
+ret = do.call(rbind, lapply(unique(combined$group), function(group) {
+    r = combined[combined$group == group, ]
+    r$relative_amplitude = r$amplitude / r[r$timepoint == 0, ]$amplitude
+    r
+}))
+
+
+
+png('baseline.fixed.png', width=1000,height=800)
+ggplot(ret, aes(timepoint, relative_amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude (relative to baseline)') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Relative amplitude") +scale_colour_brewer(palette="Set2")
+invisible(dev.off())
+pdf('baseline.fixed.pdf', width=11,height=8)
+ggplot(ret, aes(timepoint, relative_amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude (relative to baseline)') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Relative am
+```
+
+Example output
+
+![](combined.png)
+
+
+## Using EODPlotter as an R library
+
+
+
+
+Load the library
+
+```{r}
+library(eodplotter)
+```
+
+
+Plot the raw signal of the data using plotTdms
+
+```{r}
+plotTdms('../tests/testthat/file.tdms')
+```
+
+Find peaks
+
+```{r}
+p = peakFinder('../tests/testthat/file.tdms')
+print(head(p))
+```
+
+Get a matrix of EOD signal
+
+```{r}
+m = getEODMatrix('../tests/testthat/file.tdms', p, prebaseline=T)
+print(head(m))
+```
+
+Plot the matrix of EOD signals
+
+```{r}
+plotAverage(m)
+```
+
+
+
+Plot all the signals
+
+```{r}
+plotTotal(m)
+```
+
+
+
+Plot the matrix of EOD signals
+
+```{r}
+landmarks = findLandmarks(m)
+print(landmarks)
+```
+
+
+Plot the landmarks
+
+```{r}
+plotLandmarks(m, landmarks)
+```
+
+
+Get stats about the landmarks
+
+```{r}
+getStats(p, landmarks)
+```
+
+
+
+### Command line reference
 
 #### `tdmsplot`
 
@@ -230,172 +398,6 @@ Options:
         Plot all traces
 ```
 
-
-## Sample command line analysis
-
-
-
-### Process a single TDMS file
-
-
-```
-# get the raw signal trace
-tdmsplot -f file.tdms
-
-# find EODs and output verbose
-peak_finder -f file.tdms -v
-
-# get stats about the EODs
-eodplot -f file.tdms
-```
-
-### Process all files in parallel
-
-
-For example, save this script and run e.g. process.sh ~/path/to/tdms/files/*.tdms
-
-
-```
-parallel "tdmsplot -f {}" ::: /path/to/files/*.tdms
-parallel "peak_finder -f {} -v" ::: /path/to/files/*.tdms
-parallel "eodplot -f {} -p {/}.peaks.csv" ::: /path/to/files/*.tdms
-```
-
-
-### Combine all stats.csv
-
-A helper script called combine_stats is added so after processing many TDMS files, simply run
-
-```
-combine_stats
-```
-
-This will output a combined stats file
-
-
-### Summarize EOD results from different experiments
-
-If you have different experiments with different timepoints and you want to compare them all then this script is an example of something you could try
-
-This will plot the amplitude from multiple experiments where it assumes some particular file naming conventions e.g. 
-
-- 1_MOCntrl1_Baseline_2017_06_29_07_34_08.tdms
-- 2_MOCntrl1_30_2017_06_29_08_21_23.tdms
-- 3_MOCntrl1_60_2017_06_29_09_00_21.tdms
-
-Generic pattern `<number>_MO<experimentname>_minutes_timestamp.tdms`
-
-```
-library(stringr)
-library(ggplot2)
-suppressMessages(library(lubridate))
-combined=read.csv('combined.data.csv',stringsAsFactors=F)
-
-l = str_split(substr(combined$name,0,str_locate(combined$name,'2017')[,1]-2),'_')
-combined$trial = as.numeric(sapply(l,function(r) r[1]))
-combined$group = tolower(sapply(l,function(r) r[2]))
-m = sapply(l, function(r) r[3])
-m[m == 'Baseline'] = 0
-combined$timepoint = as.numeric(m)
-combined$date = ymd_hms(str_replace(substring(combined$name, str_locate(combined$name,'2017')[,1]), '.tdms.stats.csv',''))
- 
-png('combined.fixed.png', width=1000,height=800)
-ggplot(combined, aes(timepoint, amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Peak-to-peak amplitude") +scale_colour_brewer(palette="Set2")
-invisible(dev.off())
-pdf('combined.fixed.pdf', width=11,height=8)
-ggplot(combined, aes(timepoint, amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Peak-to-peak amplitude") +scale_colour_brewer(palette="Set2")
-invisible(dev.off())
-
-
-
-ret = do.call(rbind, lapply(unique(combined$group), function(group) {
-    r = combined[combined$group == group, ]
-    r$relative_amplitude = r$amplitude / r[r$timepoint == 0, ]$amplitude
-    r
-}))
-
-
-
-png('baseline.fixed.png', width=1000,height=800)
-ggplot(ret, aes(timepoint, relative_amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude (relative to baseline)') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Relative amplitude") +scale_colour_brewer(palette="Set2")
-invisible(dev.off())
-pdf('baseline.fixed.pdf', width=11,height=8)
-ggplot(ret, aes(timepoint, relative_amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude (relative to baseline)') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Relative am
-```
-
-Example output
-
-![](combined.png)
-
-
-## Using EODPlotter as an R library
-
-
-
-
-Load the library
-
-```{r}
-library(eodplotter)
-```
-
-
-Plot the raw signal of the data using plotTdms
-
-```{r}
-plotTdms('../tests/testthat/file.tdms')
-```
-
-Find peaks
-
-```{r}
-p = peakFinder('../tests/testthat/file.tdms')
-print(head(p))
-```
-
-Get a matrix of EOD signal
-
-```{r}
-m = getEODMatrix('../tests/testthat/file.tdms', p, prebaseline=T)
-print(head(m))
-```
-
-Plot the matrix of EOD signals
-
-```{r}
-plotAverage(m)
-```
-
-
-
-Plot all the signals
-
-```{r}
-plotTotal(m)
-```
-
-
-
-Plot the matrix of EOD signals
-
-```{r}
-landmarks = findLandmarks(m)
-print(landmarks)
-```
-
-
-Plot the landmarks
-
-```{r}
-plotLandmarks(m, landmarks)
-```
-
-
-Get stats about the landmarks
-
-```{r}
-getStats(p, landmarks)
-```
 
 
 ## Conclusion
