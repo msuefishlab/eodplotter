@@ -2,11 +2,15 @@
 title: "EODPlotter manual"
 author: "Colin Diesh"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{Vignette Title}
   %\VignetteEncoding{UTF-8}
+output:
+  rmarkdown::html_document:
+      theme: lumen
+      toc: true
+          toc_depth: 2
 ---
 
 
@@ -43,17 +47,17 @@ can also run
 install_github('msuefishlab/eodplotter@0.0.3')
 ```
 
-#### Important for command line usage
 
-Also add this to your .bash_profile to add the Rscripts to your command line path:
+
+## Using EODPlotter as a command line tool
+
+### Configure your command line
+
+Add this line to your .bash_profile
 
 ```
 export PATH=$PATH:`Rscript -e 'cat(paste0(.libPaths(),"/eodplotter/scripts",collapse=":"))'`:~/bin
 ```
-
-
-
-## Using EODPlotter as a command line tool
 
 ### Process a TDMS file
 
@@ -103,6 +107,226 @@ Outputs a file.signal.png file representing the raw signal values of the EODs
 
 ```
 Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/peak_finder [options]
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS file input
+
+    -v, --verbose
+        Print verbose output
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -n NUMBER, --number=NUMBER
+        Peak finder threshold, sigma or voltage threshold
+
+    -d DIRECTION, --direction=DIRECTION
+        Direction, enter either positive/negative/none
+
+    -s START, --start=START
+        Start time
+
+    -e END, --end=END
+        End time
+
+    -r REMOVE, --remove=REMOVE
+        Amount to remove from start/end of recording
+```
+
+Outputs a file.peaks.png file representing the timepoints where EODs were detected in the TDMS file
+
+
+#### `eodplot`
+
+
+```
+Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/eodplot [options]
+
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS file input
+
+    -p PEAK, --peak=PEAK
+        Peak file input
+
+    -v, --verbose
+        Print verbose output
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -w WINDOW, --window=WINDOW
+        Window size around peak value
+
+    -b, --prebaseline
+        Pre-normalization baseline subtract
+
+    -d, --postbaseline
+        Post-normalization baseline subtract
+
+    -n, --normalize
+        Normalize waveform between 0-1 peak to peak height
+
+    -a ALPHA, --alpha=ALPHA
+        Alpha channel for individual peaks
+
+```
+
+Outputs a bunch of files completing the analysis
+
+- file.all.png - a visualization of all EOD signal traces
+- file.average.png - the average EOD waveform
+- file.average.landmarks.png - the average EOD waveform with landmarks plotted
+- file.landmarks.csv - the data on the landmarks detected
+- file.stats.csv - the data on duration, amplitude, and number of EODs detected
+
+
+#### `multieodplot`
+
+```
+Usage: /Users/cdiesh/src/github.com/msuefishlab/eodplotter/inst/scripts/multieodplot [options]
+
+
+Options:
+    -h, --help
+        Show this help message and exit
+
+    -f FILE, --file=FILE
+        TDMS/Peak file table
+
+    -c CHANNEL, --channel=CHANNEL
+        Channel name
+
+    -w WINDOW, --window=WINDOW
+        Window size around peak value
+
+    -v, --verbose
+        Print verbose output
+
+    -b, --prebaseline
+        Pre-normalization baseline subtract
+
+    -d, --postbaseline
+        Post-normalization baseline subtract
+
+    -n, --normalize
+        Normalize waveform between 0-1 peak to peak height
+
+    -a ALPHA, --alpha=ALPHA
+        Transparency factor aka alpha channel for plotting EODs
+
+    -p, --pdf
+        Use PDF output
+
+    -A, --all
+        Plot all traces
+```
+
+
+## Sample command line analysis
+
+
+
+### Process a single TDMS file
+
+
+```
+# get the raw signal trace
+tdmsplot -f file.tdms
+
+# find EODs and output verbose
+peak_finder -f file.tdms -v
+
+# get stats about the EODs
+eodplot -f file.tdms
+```
+
+### Process all files in parallel
+
+
+For example, save this script and run e.g. process.sh ~/path/to/tdms/files/*.tdms
+
+
+```
+parallel "tdmsplot -f {}" ::: /path/to/files/*.tdms
+parallel "peak_finder -f {} -v" ::: /path/to/files/*.tdms
+parallel "eodplot -f {} -p {/}.peaks.csv" ::: /path/to/files/*.tdms
+```
+
+
+### Combine all stats.csv
+
+A helper script called combine_stats is added so after processing many TDMS files, simply run
+
+```
+combine_stats
+```
+
+This will output a combined stats file
+
+
+### Summarize EOD results from different experiments
+
+If you have different experiments with different timepoints and you want to compare them all then this script is an example of something you could try
+
+This will plot the amplitude from multiple experiments where it assumes some particular file naming conventions e.g. 
+
+- 1_MOCntrl1_Baseline_2017_06_29_07_34_08.tdms
+- 2_MOCntrl1_30_2017_06_29_08_21_23.tdms
+- 3_MOCntrl1_60_2017_06_29_09_00_21.tdms
+
+Generic pattern `<number>_MO<experimentname>_minutes_timestamp.tdms`
+
+```
+library(stringr)
+library(ggplot2)
+suppressMessages(library(lubridate))
+combined=read.csv('combined.data.csv',stringsAsFactors=F)
+
+l = str_split(substr(combined$name,0,str_locate(combined$name,'2017')[,1]-2),'_')
+combined$trial = as.numeric(sapply(l,function(r) r[1]))
+combined$group = tolower(sapply(l,function(r) r[2]))
+m = sapply(l, function(r) r[3])
+m[m == 'Baseline'] = 0
+combined$timepoint = as.numeric(m)
+combined$date = ymd_hms(str_replace(substring(combined$name, str_locate(combined$name,'2017')[,1]), '.tdms.stats.csv',''))
+ 
+png('combined.fixed.png', width=1000,height=800)
+ggplot(combined, aes(timepoint, amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Peak-to-peak amplitude") +scale_colour_brewer(palette="Set2")
+invisible(dev.off())
+pdf('combined.fixed.pdf', width=11,height=8)
+ggplot(combined, aes(timepoint, amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Peak-to-peak amplitude") +scale_colour_brewer(palette="Set2")
+invisible(dev.off())
+
+
+
+ret = do.call(rbind, lapply(unique(combined$group), function(group) {
+    r = combined[combined$group == group, ]
+    r$relative_amplitude = r$amplitude / r[r$timepoint == 0, ]$amplitude
+    r
+}))
+
+
+
+png('baseline.fixed.png', width=1000,height=800)
+ggplot(ret, aes(timepoint, relative_amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude (relative to baseline)') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Relative amplitude") +scale_colour_brewer(palette="Set2")
+invisible(dev.off())
+pdf('baseline.fixed.pdf', width=11,height=8)
+ggplot(ret, aes(timepoint, relative_amplitude, color = group)) + geom_line() + ggtitle('MO EOD amplitude (relative to baseline)') + scale_x_continuous(name="Timepoint") + scale_y_continuous(name="Relative am
+```
+
+Example output
+
+![](combined.png)
+
 
 ## Using EODPlotter as an R library
 

@@ -1,0 +1,22 @@
+#!/usr/bin/env Rscript
+
+
+myfiles=list.files(pattern='*.stats.csv')
+print(myfiles)
+
+mycsvs = lapply(myfiles, read.csv)
+names(mycsvs)=myfiles
+print(mycsvs)
+
+
+for(i in 1:length(mycsvs)) {
+   mycsvs[[i]]$name = myfiles[i]
+}
+
+
+
+mytable = do.call(rbind, mycsvs)
+
+write.csv(mytable, 'combined.data.csv', quote=F,row.names=F)
+
+print('combined files into combined.data.csv')
