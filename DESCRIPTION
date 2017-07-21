@@ -1,6 +1,6 @@
 Package: eodplotter
 Title: Plot EOD events from tdms files
-Version: 0.0.3
+Version: 0.0.4
 Authors@R: person("Colin", "Diesh", email = "colin.diesh@gmail.com", role = c("aut", "cre"))
 Author: Colin Diesh <colin.diesh@gmail.com>
 Maintainer: Colin Diesh <colin.diesh@gmail.com>

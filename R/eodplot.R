@@ -42,7 +42,7 @@ getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", pr
         sp = s/inc
         ep = e/inc
         dat = r$data[sp:ep]
-        t = seq(s, e, by = inc) - s
+        t = seq(s, e, by = inc) - start
         t = t[1:length(dat)]
 
         if(row[[2]] == '-') {

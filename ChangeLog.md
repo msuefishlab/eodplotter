@@ -1,3 +1,7 @@
+## Version 0.0.4
+
+- Fix small bug in plotting where time is now centered on P1
+
 ## Version 0.0.3
 
 - Control for signal spikes that are not EODs in the peak finder
