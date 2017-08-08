@@ -3,7 +3,6 @@
 library(tdmsreader)
 library(ggplot2)
 suppressPackageStartupMessages(library('optparse'))
-options(bitmapType='cairo')
 
 parser <- OptionParser()
 parser <- add_option(parser, c('-f', '--file'), help='TDMS/Peak file table')
