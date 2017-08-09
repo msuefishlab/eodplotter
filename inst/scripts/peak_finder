@@ -13,6 +13,7 @@ parser <- add_option(parser, c('-d', '--direction'), default = "none", help='Dir
 parser <- add_option(parser, c('-s', '--start'), default = 0, type="double", help="Start time")
 parser <- add_option(parser, c('-e', '--end'), default = 0, type="double", help="End time")
 parser <- add_option(parser, c('-r', '--remove'), default = 0, type="double", help="Amount to remove from start/end of recording")
+parser <- add_option(parser, c('-w', '--window'), default = 500, type="double", help="Window size for adaptive mean/sd calculation")
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
@@ -27,7 +28,7 @@ if (!file.exists(opts$file)) {
 
 
 
-p=peakFinder(opts$file, channel = opts$channel, threshold = opts$number, direction = opts$direction, remove = opts$remove, start = opts$start, end = opts$end, verbose = opts$verbose)
+p=peakFinder(opts$file, channel = opts$channel, threshold = opts$number, direction = opts$direction, remove = opts$remove, start = opts$start, end = opts$end, verbose = opts$verbose, winsize = opts$window)
 write.csv(p, file=paste0(basename(opts$file),'.peaks.csv'), quote=F, row.names=F)
 
 

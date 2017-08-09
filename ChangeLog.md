@@ -1,7 +1,7 @@
 ## Version 0.0.5
 
 - Add ability to plot the identified EODs on tdmsplot
-- Peak finding fixes
+- Use adaptive standard deviations using rolling averages for peak finder
 
 ## Version 0.0.4
 

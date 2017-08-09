@@ -57,17 +57,18 @@ export PATH=$PATH:`Rscript -e 'cat(paste0(.libPaths(),"/eodplotter/scripts",coll
 ### Process a TDMS file
 
 
-First try using the `tdmsplot` command, it plots the raw signal as a graph, use to diagnose signal problems
-```
-tdmsplot -f file.tdms
-```
-
-
-Then use `peak_finder` to find all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)
+First use `peak_finder` to find all EODs and outputs a new file, e.g. file.peaks.csv, which is named based on the input file (if you analyzed fish.tdms, it would output fish.peaks.csv)
 
 ```
 peak_finder -f file.tdms -v
 ```
+
+Then try using the `tdmsplot` command, it plots the raw signal as a graph, use to diagnose signal problems and view where EODs were called
+
+```
+tdmsplot -f file.tdms -p file.tdms.peaks.csv 
+```
+
 
 Finally analyze the signal and the peaks to produce output files
 
@@ -93,13 +94,11 @@ The file.stats.csv file contains useful information on duration and amplitude, a
 ### Process all files in parallel
 
 
-For example, save this script and run e.g. process.sh ~/path/to/tdms/files/*.tdms
+This script will run the EOD analysis over all tdms files in a directory
 
 
 ```
-parallel "tdmsplot -f {}" ::: /path/to/files/*.tdms
-parallel "peak_finder -f {} -v" ::: /path/to/files/*.tdms
-parallel "eodplot -f {} -p {/}.peaks.csv" ::: /path/to/files/*.tdms
+parallel "peak_finder -f {}; tdmsplot -f {} -p {/}.peaks.csv; eodplot -f {} -p {/}.peaks.csv" ::: /path/to/files/*.tdms
 ```
 
 
@@ -193,6 +192,13 @@ Find peaks
 p = peakFinder('../tests/testthat/file.tdms')
 print(head(p))
 ```
+
+Look at where the peaks were called
+
+```{r}
+plotTdms('../tests/testthat/file.tdms', peaks = p)
+```
+
 
 Get a matrix of EOD signal
 

@@ -5,8 +5,8 @@
 \title{Find peaks from a TDMS file}
 \usage{
 peakFinder(filename, channel = "/'Untitled'/'Dev1/ai0'", direction = "none",
-  threshold = 5, start = NULL, end = NULL, remove = NULL, verbose = F,
-  progressCallback = NULL)
+  threshold = 7, start = NULL, end = NULL, remove = NULL, verbose = F,
+  progressCallback = NULL, winsize = 3000)
 }
 \arguments{
 \item{filename}{The filename}
@@ -26,6 +26,8 @@ peakFinder(filename, channel = "/'Untitled'/'Dev1/ai0'", direction = "none",
 \item{verbose}{Verbose output}
 
 \item{progressCallback}{Callback for progress event update}
+
+\item{winsize}{size of the adaptive rolling mean/sd calculation}
 }
 \description{
 Find peaks from a TDMS file

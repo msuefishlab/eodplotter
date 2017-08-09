@@ -5,7 +5,7 @@
 \title{Plot the signal vs time for a TDMS file}
 \usage{
 plotTdms(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0,
-  end = NULL)
+  end = NULL, peaks = NULL)
 }
 \arguments{
 \item{filename}{The filename}
@@ -15,6 +15,8 @@ plotTdms(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0,
 \item{start}{Default 0}
 
 \item{end}{Default end of tdms file data}
+
+\item{peaks}{A data frame of peak data and orientations}
 }
 \description{
 Plot the signal vs time for a TDMS file

@@ -18,6 +18,9 @@ p = peakFinder('../tests/testthat/file.tdms')
 print(head(p))
 
 ## ------------------------------------------------------------------------
+plotTdms('../tests/testthat/file.tdms', peaks = p)
+
+## ------------------------------------------------------------------------
 m = getEODMatrix('../tests/testthat/file.tdms', p, prebaseline=T)
 print(head(m))
 

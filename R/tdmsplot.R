@@ -7,6 +7,7 @@ library(tdmsreader)
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
 #' @param start Default 0
 #' @param end Default end of tdms file data
+#' @param peaks A data frame of peak data and orientations
 plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, end = NULL, peaks = NULL) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
