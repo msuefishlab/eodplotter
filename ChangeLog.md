@@ -1,3 +1,8 @@
+## Version 0.0.5
+
+- Add ability to plot the identified EODs on tdmsplot
+- Peak finding fixes
+
 ## Version 0.0.4
 
 - Fix small bug in plotting where time is now centered on P1
