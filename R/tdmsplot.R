@@ -7,7 +7,7 @@ library(tdmsreader)
 #' @param channel The channel name, default /'Untitled'/'Dev1/ai0' which is just common in our lab
 #' @param start Default 0
 #' @param end Default end of tdms file data
-plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, end = NULL) {
+plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, end = NULL, peaks = NULL) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
     c = ifelse(is.null(channel), "/'Untitled'/'Dev1/ai0'", channel)
@@ -36,6 +36,12 @@ plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, en
         plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
     } else {
         plot(t, dat, type = 'l', xlab = 'time', ylab = 'volts')
+    }
+    if(!is.null(peaks)) {
+        peaks = peaks[peaks[,1]>s & peaks[,1]<e,]
+        vals = peaks[,1] / r$properties[['wf_increment']]
+        v = dat[vals/10]
+        points(peaks[,1], v, col='red', pch=20)
     }
     title(filename)
 }

@@ -10,6 +10,7 @@ parser <- add_option(parser, c("-v", "--verbose"), help="Print verbose output")
 parser <- add_option(parser, c("-c", "--channel"), help="Channel name")
 parser <- add_option(parser, c("-s", "--start"), type="double", help="Start time")
 parser <- add_option(parser, c("-e", "--end"), type="double", help="End time")
+parser <- add_option(parser, c("-p", "--peaks"), help="peaks")
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)
@@ -23,5 +24,9 @@ if (!file.exists(opts$file)) {
 }
 
 png(paste0(basename(opts$file),'.signal.png'), width=2000, height=900)
-plotTdms(opts$file, opts$channel, opts$start, opts$end)
+if(!is.null(opts$peaks)) {
+    plotTdms(opts$file, opts$channel, opts$start, opts$end, peaks = read.csv(opts$peaks))
+} else {
+    plotTdms(opts$file, opts$channel, opts$start, opts$end)
+}
 invisible(dev.off())
