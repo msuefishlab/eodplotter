@@ -40,21 +40,24 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction = "
     dat = r$data
     close(m)
 
-    mysd = sd(dat)
-    allmean = mean(dat)
+    #mysd = sd(dat)
     currTime = 0
 
     if(verbose) {
         cat(sprintf("finding peaks for %s\n", filename))
     }
     peaks = data.frame(peaks=numeric(), direction=character(), stringsAsFactors=F)
-    winsize = 5000
+    winsize = 3000
+    // fast rolling mean
     mymeans = rollmean(dat, winsize)
+    // fast sd calculation https://stackoverflow.com/questions/24066085/rolling-standard-deviation-in-a-matrix-in-r
+    mysds = sqrt((winsize/(winsize-1)) * (rollmean(dat^2, winsize) - mymeans^2))
 
     for(i in seq(winsize+1, length(dat) - winsize, by = 3)) {
         ns = max(i - 1000, 1)
         mymean = mymeans[i]
         ne = i + 1000
+        mysd = mysds[i]
         if(i %% 100000 == 0) {
             if(verbose) {
                 cat(sprintf("\rprogress %d%%", round(100 * i / length(dat))))
@@ -64,6 +67,7 @@ peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction = "
             }
         }
         if(t[i] - currTime > 0.001) {
+            #cat(paste('mymean',mymean, 'dat',dat[i],'t',mymean+mysd*threshold,'\n'))
             if(dat[i] > mymean + mysd * threshold) {
                 loc_max = which.max(dat[ns:ne])
                 loc_min = which.min(dat[ns:ne])
