@@ -40,7 +40,7 @@ plotTdms <- function(filename, channel = "/'Untitled'/'Dev1/ai0'", start = 0, en
     if(!is.null(peaks)) {
         peaks = peaks[peaks[,1]>s & peaks[,1]<e,]
         vals = peaks[,1] / r$properties[['wf_increment']]
-        v = dat[vals/10]
+        v = dat[vals-s/r$properties[['wf_increment']] ]
         points(peaks[,1], v, col='red', pch=20)
     }
     title(filename)
