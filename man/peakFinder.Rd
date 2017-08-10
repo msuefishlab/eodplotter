@@ -6,7 +6,7 @@
 \usage{
 peakFinder(filename, channel = "/'Untitled'/'Dev1/ai0'", direction = "none",
   threshold = 7, start = NULL, end = NULL, remove = NULL, verbose = F,
-  progressCallback = NULL, winsize = 3000)
+  progressCallback = NULL, winsize = 5000)
 }
 \arguments{
 \item{filename}{The filename}
