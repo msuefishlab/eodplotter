@@ -13,7 +13,7 @@ parser <- add_option(parser, c('-d', '--direction'), default = "none", help='Dir
 parser <- add_option(parser, c('-s', '--start'), default = 0, type="double", help="Start time")
 parser <- add_option(parser, c('-e', '--end'), default = 0, type="double", help="End time")
 parser <- add_option(parser, c('-r', '--remove'), default = 0, type="double", help="Amount to remove from start/end of recording")
-parser <- add_option(parser, c('-w', '--window'), default = 3000, type="double", help="Window size for adaptive mean/sd calculation")
+parser <- add_option(parser, c('-w', '--window'), default = 5000, type="double", help="Window size for adaptive mean/sd calculation")
 
 options = commandArgs(trailingOnly = TRUE)
 opts = parse_args(parser, args = options)

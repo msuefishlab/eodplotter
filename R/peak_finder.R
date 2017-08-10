@@ -16,7 +16,7 @@ library(tdmsreader)
 #' @param verbose Verbose output
 #' @param progressCallback Callback for progress event update
 #' @param winsize size of the adaptive rolling mean/sd calculation
-peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction = "none", threshold = 7, start = NULL, end = NULL, remove = NULL, verbose = F, progressCallback = NULL, winsize = 3000) {
+peakFinder <- function(filename, channel="/'Untitled'/'Dev1/ai0'", direction = "none", threshold = 7, start = NULL, end = NULL, remove = NULL, verbose = F, progressCallback = NULL, winsize = 5000) {
     m = file(filename, 'rb')
     main = TdmsFile$new(m)
 
