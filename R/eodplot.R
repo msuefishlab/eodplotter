@@ -58,7 +58,7 @@ getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", pr
             dat = dat - mean(dat[1:25])
         }
         # rounding important here to avoid different values being collapsed. significant digits may change on sampling rate of tdms
-        data.frame(col = start, time = round(t, digits=5), data = dat)
+        data.frame(col = start, time = round(t, digits=6), data = dat)
     })
     if(verbose) {
         cat('combining data frames...\n')
@@ -74,99 +74,73 @@ getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", pr
 #'
 #' @param plotdata The EOD matrix from getEODMatrix
 findLandmarks <- function(plotdata) {
-
+    
+    #reorganize data into matrix (rows = each eod, column each point)
     ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
+    neods<-dim(ret)[2]
+    npoints<-dim(ret)[1]
+    
+    # calculate average waveform
     avg = apply(ret, 1, mean)
     avg = avg[1:(length(avg)-1)]
-    data = data.frame(time = as.numeric(names(avg)), val = as.numeric(avg))
+    data = data.frame(time = as.numeric(names(avg)), voltage = as.numeric(avg)) 
     data = data[1:nrow(data)-1,]
-    p1pos = which.max(data$val)
+    
+    #find p1 in average waveform
+    p1pos = which.max(data$voltage)
+    
+    #calculate waveform  voltage @ P1
     p1 = data[p1pos, ]
-    p1_e = plotdata[p1$time == plotdata$time,]
-    p2pos = which.min(data$val)
+    
+    
+    #find p1 in each individual waveform
+    p1pos_e = apply(ret,2,which.max)
+    p1pos_e = data.frame(time = as.numeric(names(p1pos_e)), index = as.numeric(p1pos_e))
+
+    #calculate waveform voltage @ each P1
+    p1_e<-data.frame(time = p1pos_e$time, voltage = ret[,1:neods][p1pos_e$index],index = p1pos_e$index )
+
+    #find p2 in average waveform
+    p2pos = which.min(data$voltage)
+    
+    #calcualte waveform voltage @ P2
     p2 = data[p2pos, ]
-    p2_e = plotdata[p2$time == plotdata$time,]
-    leftside = data[1:p1pos, ]
-    middle = data[p1pos:p2pos, ]
-    rightside = data[p2pos:nrow(data), ]
+    
+    #find p2 in each individual waveform
+    p2pos_e = apply(ret,2,which.min)
+    p2pos_e = data.frame(time = as.numeric(names(p2pos_e)), index = as.numeric(p2pos_e))
+    
+    
+    #calculate waveform voltage @ each P2
+    p2_e<-data.frame(time = p2pos_e$time, voltage = ret[,1:neods][p2pos_e$index], index=p2pos_e$index)
+    
+    
+    avg_p1_p2_data<-data.frame(p1=p1,p2=p2,p1_i=as.numeric(rownames(p1)),p2_i=as.numeric(rownames(p2)))
+    
 
-    baseline = mean(data$val[1:25])
-    p0 = NULL
-    t1 = NULL
-    t2 = NULL
-    slope1 = NULL
-    slope2 = NULL
-    s1 = NULL
-    s2 = NULL
-    zc1 = NULL
-    zc2 = NULL
-    for(i in nrow(leftside):1) {
-        if(leftside[i, 'val'] < baseline) {
-            zc1 = leftside[i,]
-            zc1_e = plotdata[zc1$time==plotdata$time, ]
-            tzc1 = zc1$time
-            p0calculator = leftside[leftside$time >= tzc1-0.0005 & leftside$time <= tzc1,]
-            p0 = p0calculator[which.min(p0calculator$val), ]
-            p0_e = plotdata[p0$time==plotdata$time, ]
-            break
-        }
+    # drop in for species-specific stuff
+    lm_av<-findmormyridlandmarks(data,p1pos,p2pos,25)
+    lm_av$duration<-lm_av$t2.time-lm_av$t1.time
+    row.names(lm_av)<-"avg_eod"
+    
+    lm_raw<-NULL
+    for (i in 1:neods) {
+      lm_raw[[i]]<-findmormyridlandmarks(data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i])),p1_e$index[i],p2_e$index[i],25)
     }
-    for(i in nrow(leftside):1) {
-        if(leftside[i, 'val'] < baseline + 0.02 * (p1$val - p2$val)) {
-            t1 = leftside[i,]
-            t1_e = plotdata[t1$time==plotdata$time, ]
-            slope1 = leftside[i:nrow(leftside), ]
-            break
-        }
-    }
-    for(i in 1:nrow(rightside)) {
-        if(rightside[i, 'val'] > baseline - 0.02 * (p1$val - p2$val)) {
-            t2 = rightside[i,]
-            t2_e = plotdata[t2$time==plotdata$time, ]
-            break
-        }
-    }
-    if(is.null(t2)) {
-        t2 = rightside[20,]
-        t2_e = plotdata[t2$time==plotdata$time, ]
-    }
-
-    slope1_max = -100000
-    for(i in 1:(nrow(slope1)-1)) {
-        s = (slope1[i+1, 'val'] - slope1[i, 'val']) / (slope1[i+1, 'time'] - slope1[i, 'time'])
-        if(s > slope1_max) {
-            slope1_max = s
-            s1 = slope1[i,]
-            s1_e = plotdata[s1$time==plotdata$time, ]
-        }
-    }
-    slope2_max = 100000
-    for(i in 1:(nrow(middle)-1)) {
-        s = (middle[i+1, 'val'] - middle[i, 'val']) / (middle[i+1, 'time'] - middle[i, 'time'])
-        if(s < slope2_max) {
-            slope2_max = s
-            s2 = middle[i, ]
-            s2_e = plotdata[s2$time==plotdata$time, ]
-        }
-    }
-    for(i in 1:nrow(middle)) {
-        if(middle[i, 'val'] < baseline) {
-            zc2 = middle[i,]
-            zc2_e = plotdata[zc2$time==plotdata$time, ]
-            break
-        }
-    }
-
-    if(!is.null(p0)) landmark_table = data.frame(landmark = 'p0', time = p0$time, val = p0$val, mean = mean(p0_e$data,na.rm=T), sd = sd(p0_e$data,na.rm=T))
-    if(!is.null(p1)) landmark_table = rbind(landmark_table, data.frame(landmark = 'p1', time = p1$time, val = p1$val, mean = mean(p1_e$data,na.rm=T), sd = sd(p1_e$data,na.rm=T)))
-    if(!is.null(p2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'p2', time = p2$time, val = p2$val, mean = mean(p2_e$data,na.rm=T), sd = sd(p2_e$data,na.rm=T)))
-    if(!is.null(t1)) landmark_table = rbind(landmark_table, data.frame(landmark = 't1', time = t1$time, val = t1$val, mean = mean(t1_e$data,na.rm=T), sd = sd(t1_e$data,na.rm=T)))
-    if(!is.null(t2)) landmark_table = rbind(landmark_table, data.frame(landmark = 't2', time = t2$time, val = t2$val, mean = mean(t2_e$data,na.rm=T), sd = sd(t2_e$data,na.rm=T)))
-    if(!is.null(s1)) landmark_table = rbind(landmark_table, data.frame(landmark = 's1', time = s1$time, val = s1$val, mean = mean(s1_e$data,na.rm=T), sd = sd(s1_e$data,na.rm=T)))
-    if(!is.null(s2)) landmark_table = rbind(landmark_table, data.frame(landmark = 's2', time = s2$time, val = s2$val, mean = mean(s2_e$data,na.rm=T), sd = sd(s2_e$data,na.rm=T)))
-    if(!is.null(zc1)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc1', time = zc1$time, val = zc1$val, mean = mean(zc1_e$data,na.rm=T), sd = sd(zc1_e$data,na.rm=T)))
-    if(!is.null(zc2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc2', time = zc2$time, val = zc2$val, mean = mean(zc2_e$data,na.rm=T), sd = sd(zc2_e$data,na.rm=T)))
-    landmark_table
+    lm_raw<-do.call(rbind,a)
+    
+    #call P1 time 0
+    #lm_raw[,c(3,5,7,9,11,13)]<-lm_raw[,c(3,5,7,9,11,13)]
+    #lm_av[,c(3,5,7,9,11,13)]<-lm_raw[,c(3,5,7,9,11,13)]
+    lm_raw$duration<-lm_raw$t2.time-lm_raw$t1.time
+    
+    
+    lm_raw_ss<-NULL
+    lm_raw_ss$mean<-apply(lm_raw,2,mean)
+    lm_raw_ss$sd<-apply(lm_raw,2,sd)
+    lm_raw_ss<-t(as.data.frame(lm_raw_ss))
+    
+    rbind(lm_av,lm_raw_ss)
 }
 
 
