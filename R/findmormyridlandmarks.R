@@ -1,4 +1,4 @@
-findmormyridlandmarks <- function(data,p1pos,p2pos,baseline_n) {
+findmormyridlandmarks <- function(data,p1pos,p2pos,p1voltage,p2voltage,baseline_n) {
 
 leftside = data[1:p1pos, ]
 middle = data[p1pos:p2pos, ]
@@ -27,14 +27,14 @@ for(i in nrow(leftside):1) {
   }
 }
 for(i in nrow(leftside):1) {
-  if(leftside[i, 'voltage'] < baseline + 0.02 * (p1$voltage - p2$voltage)) {
+  if(leftside[i, 'voltage'] < baseline + 0.02 * (p1voltage - p2voltage)) {
     t1 = leftside[i,]
     slope1 = leftside[i:nrow(leftside), ]
     break
   }
 }
 for(i in 1:nrow(rightside)) {
-  if(rightside[i, 'voltage'] > baseline - 0.02 * (p1$voltage - p2$voltage)) {
+  if(rightside[i, 'voltage'] > baseline - 0.02 * (p1voltage - p2voltage)) {
     t2 = rightside[i,]
     break
   }

@@ -74,25 +74,26 @@ getEODMatrix <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", pr
 #'
 #' @param plotdata The EOD matrix from getEODMatrix
 findLandmarks <- function(plotdata) {
-    
+
     #reorganize data into matrix (rows = each eod, column each point)
     ret = acast(plotdata, time ~ col, value.var = 'data', fun.aggregate = mean)
     neods<-dim(ret)[2]
     npoints<-dim(ret)[1]
-    
+
     # calculate average waveform
     avg = apply(ret, 1, mean)
     avg = avg[1:(length(avg)-1)]
-    data = data.frame(time = as.numeric(names(avg)), voltage = as.numeric(avg)) 
+    data = data.frame(time = as.numeric(names(avg)), voltage = as.numeric(avg))
     data = data[1:nrow(data)-1,]
-    
+
     #find p1 in average waveform
     p1pos = which.max(data$voltage)
-    
+
     #calculate waveform  voltage @ P1
     p1 = data[p1pos, ]
-    
-    
+    p1$index=p1pos
+
+
     #find p1 in each individual waveform
     p1pos_e = apply(ret,2,which.max)
     p1pos_e = data.frame(time = as.numeric(names(p1pos_e)), index = as.numeric(p1pos_e))
@@ -102,51 +103,53 @@ findLandmarks <- function(plotdata) {
 
     #find p2 in average waveform
     p2pos = which.min(data$voltage)
-    
+
     #calcualte waveform voltage @ P2
     p2 = data[p2pos, ]
+    p2$index=p2pos
     
+
     #find p2 in each individual waveform
     p2pos_e = apply(ret,2,which.min)
     p2pos_e = data.frame(time = as.numeric(names(p2pos_e)), index = as.numeric(p2pos_e))
-    
-    
+
+
     #calculate waveform voltage @ each P2
     p2_e<-data.frame(time = p2pos_e$time, voltage = ret[,1:neods][p2pos_e$index], index=p2pos_e$index)
-    
-    
+
+
     avg_p1_p2_data<-data.frame(p1=p1,p2=p2,p1_i=as.numeric(rownames(p1)),p2_i=as.numeric(rownames(p2)))
-    
+
 
     # drop in for species-specific stuff
-    lm_av<-findmormyridlandmarks(data,p1pos,p2pos,25)
+    lm_av<-findmormyridlandmarks(data,p1$index,p2$index,p1$voltage,p2$voltage,25)
     lm_av$duration<-lm_av$t2.time-lm_av$t1.time
     row.names(lm_av)<-"avg_eod"
-    
+
     lm_raw<-NULL
     for (i in 1:neods) {
-      lm_raw[[i]]<-findmormyridlandmarks(data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i])),p1_e$index[i],p2_e$index[i],25)
+      lm_raw[[i]]<-findmormyridlandmarks(data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i])),p1_e$index[i],p2_e$index[i],p1_e$voltage[i],p2_e$voltage[i], 25)
     }
-    lm_raw<-do.call(rbind,a)
-    
+    lm_raw<-do.call(rbind,lm_raw)
+
     #call P1 time 0
     #lm_raw[,c(3,5,7,9,11,13)]<-lm_raw[,c(3,5,7,9,11,13)]
     #lm_av[,c(3,5,7,9,11,13)]<-lm_raw[,c(3,5,7,9,11,13)]
     lm_raw$duration<-lm_raw$t2.time-lm_raw$t1.time
-    
-    
+
+
     lm_raw_ss<-NULL
     lm_raw_ss$mean<-apply(lm_raw,2,mean)
     lm_raw_ss$sd<-apply(lm_raw,2,sd)
     lm_raw_ss<-t(as.data.frame(lm_raw_ss))
-    
+
     rbind(lm_av,lm_raw_ss)
 }
 
 
 
 
-#' Returns a data frame with stats about the landmarks 
+#' Returns a data frame with stats about the landmarks
 #' @export
 #' @import reshape2
 #'
