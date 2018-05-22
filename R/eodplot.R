@@ -127,7 +127,8 @@ findLandmarks <- function(plotdata) {
 
     lm_raw<-NULL
     for (i in 1:neods) {
-      lm_raw[[i]]<-findmormyridlandmarks(data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i])),p1_e$index[i],p2_e$index[i],p1_e$voltage[i],p2_e$voltage[i], 25)
+      d<-data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i]))
+      lm_raw[[i]]<-findmormyridlandmarks(d,p1_e$time[i],p2_e$time[i],p1_e$index[i],p2_e$index[i],p1_e$voltage[i],p2_e$voltage[i], 25)
       lm_raw[[i]]$eodno<-i
     }
     

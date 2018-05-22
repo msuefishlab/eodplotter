@@ -7,9 +7,14 @@
 #' @param p1voltage voltage of p1 (calcualted in eodplot.R)
 #' @param p2voltage voltage of p2 (calcualted in eodplot.R)
 #' @param baseline_n number of points to use in calculating baseline
+#' @param p1time time of p1 (calculated in eodplot.R)
+#' @param p2time time of p2 (calculated in eodplot.R)
 
 
-findmormyridlandmarks <- function(data,p1pos,p2pos,p1voltage,p2voltage,baseline_n) {
+findmormyridlandmarks <- function(data,p1time,p2time,p1pos,p2pos,p1voltage,p2voltage,baseline_n) {
+
+p1=data.frame(time=p1time,index=p1pos,voltage=p1voltage)
+p2=data.frame(time=p2time,index=p2pos,voltage=p2voltage)
 
 leftside = data[1:p1pos, ]
 middle = data[p1pos:p2pos, ]
