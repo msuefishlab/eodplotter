@@ -122,50 +122,42 @@ findLandmarks <- function(plotdata) {
 
 
     # drop in for species-specific stuff
+    lm_av<-NULL
     lm_av<-findmormyridlandmarks(data,p1$index,p2$index,p1$voltage,p2$voltage,25)
-    lm_av$duration<-lm_av$t2.time-lm_av$t1.time
-    row.names(lm_av)<-"avg_eod"
 
     lm_raw<-NULL
     for (i in 1:neods) {
       lm_raw[[i]]<-findmormyridlandmarks(data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i])),p1_e$index[i],p2_e$index[i],p1_e$voltage[i],p2_e$voltage[i], 25)
+      lm_raw[[i]]$eodno<-i
     }
+    
+    #merge list
     lm_raw<-do.call(rbind,lm_raw)
-
-    #call P1 time 0
-    #lm_raw[,c(3,5,7,9,11,13)]<-lm_raw[,c(3,5,7,9,11,13)]
-    #lm_av[,c(3,5,7,9,11,13)]<-lm_raw[,c(3,5,7,9,11,13)]
-    lm_raw$duration<-lm_raw$t2.time-lm_raw$t1.time
-
-
-    lm_raw_ss<-NULL
-    lm_raw_ss$mean<-apply(lm_raw,2,mean)
-    lm_raw_ss$sd<-apply(lm_raw,2,sd)
-    lm_raw_ss<-t(as.data.frame(lm_raw_ss))
-
-    rbind(lm_av,lm_raw_ss)
-}
-
-
-
-
-#' Returns a data frame with stats about the landmarks
-#' @export
-#' @import reshape2
-#'
-#' @param peaks list of peaks from peakFinder
-#' @param landmark_table List of landmark
-getStats <- function(peaks, landmark_table) {
-    amp1=landmark_table[landmark_table$landmark=='p1',]$val
-    amp2=landmark_table[landmark_table$landmark=='p2',]$val
-    time2=landmark_table[landmark_table$landmark=='t2',]$time
-    time1=landmark_table[landmark_table$landmark=='t1',]$time
-    data.frame(
-        amplitude=amp1-amp2,
-        duration=time2-time1,
-        total_eods = nrow(peaks)
-    )
-}
+    
+    #melt into molten frame
+    a<-melt(lm_raw,id.vars=c("eodno","landmark"), measure.vars=c("time","voltage"))
+    
+    # calculate row-wise average
+    b<-acast(a,variable~landmark,fun.aggregate=function(x) mean(as.numeric(x)),value.var="value")
+    
+    #calculate row wise sd
+    c<-acast(a,variable~landmark,fun.aggregate=function(x) sd(as.numeric(x)),value.var="value")
+    
+    #rename columns
+    rownames(c)<-c("time_sd","voltage_sd")
+    
+    #add number of eods
+    n_eods<-rep(neods,dim(c)[2])
+    lm_raw<-t(rbind(b,c,n_eods))
+    
+    #ensure it's a dataframe for plotting, clean up rownames
+    lm_raw<-as.data.frame(lm_raw)
+    lm_raw$landmark<-rownames(lm_raw)
+    rownames(lm_raw)<-NULL
+    
+    #move landmark column to first position for later export
+    lm_raw[c("landmark", setdiff(names(lm_raw), "landmark"))]
+    }
 
 
 #' Plot average EOD signal
@@ -209,7 +201,7 @@ plotLandmarks <- function(plotdata, landmark_table, verbose = F) {
     if(verbose) {
         cat('plotting eod with landmarks\n')
     }
-    ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = landmark_table, aes(x=time, y=val, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1")
+    ggplot(data=plotdata, aes(x=time, y=data)) + stat_summary(aes(y = data), fun.y=mean, geom='line') + geom_point(data = na.omit(landmark_table), aes(x=time, y=voltage, color=landmark), size = 4) + scale_colour_brewer(palette = "Set1")
 }
 
 
@@ -236,10 +228,8 @@ plotEod <- function(filename, peaks, channel = "/'Untitled'/'Dev1/ai0'", prebase
     if(verbose) {
         print(landmark_table)
     }
-    stats = getStats(peaks, landmark_table)
 
     write.csv(landmark_table, paste0(basename(filename), '.landmarks.csv'), quote=F, row.names=F)
-    write.csv(stats, paste0(basename(filename), '.stats.csv'), quote=F, row.names=F)
 
     mtitle = basename(filename)
 

@@ -65,15 +65,30 @@ for(i in 1:nrow(middle)) {
     break
   }
 }
-  data.frame(
-    p0 = p0,
-    t1 = t1,
-    t2 = t2,
-    #slope1 = slope1,
-    #slope2 = slope2,
-    s1 = s1,
-    s2 = s2,
-    zc1 = zc1,
-    zc2 = zc2
-  )
+
+if(!is.null(p0)) landmark_table = data.frame(landmark = 'p0', time = p0$time, voltage = p0$voltage)
+if(!is.null(p1)) landmark_table = rbind(landmark_table, data.frame(landmark = 'p1', time = p1$time, voltage = p1$voltage))
+if(!is.null(p2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'p2', time = p2$time, voltage = p2$voltage))
+if(!is.null(t1)) landmark_table = rbind(landmark_table, data.frame(landmark = 't1', time = t1$time, voltage = t1$voltage))
+if(!is.null(t2)) landmark_table = rbind(landmark_table, data.frame(landmark = 't2', time = t2$time, voltage = t2$voltage))
+if(!is.null(s1)) landmark_table = rbind(landmark_table, data.frame(landmark = 's1', time = s1$time, voltage = s1$voltage))
+if(!is.null(s2)) landmark_table = rbind(landmark_table, data.frame(landmark = 's2', time = s2$time, voltage = s2$voltage))
+if(!is.null(zc1)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc1', time = zc1$time, voltage = zc1$voltage))
+if(!is.null(zc2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc2', time = zc2$time, voltage = zc2$voltage))
+landmark_table = rbind(landmark_table, data.frame(landmark = 'duration', time = t2$time-t1$time,voltage="NA_real_"))
+landmark_table = rbind(landmark_table, data.frame(landmark = 'amplitude', time = "NA_real_", voltage = p1voltage-p2voltage))
+
+landmark_table
+
+  #data.frame(
+  #  p0 = p0,
+  #  t1 = t1,
+  #  t2 = t2,
+  #  #slope1 = slope1,
+  #  #slope2 = slope2,
+  #  s1 = s1,
+  #  s2 = s2,
+  #  zc1 = zc1,
+  #  zc2 = zc2
+  #)
 }
