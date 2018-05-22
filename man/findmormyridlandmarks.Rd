@@ -4,23 +4,10 @@
 \alias{findmormyridlandmarks}
 \title{Find Landmarks from a Mormyrid EOD Waveform}
 \usage{
-findmormyridlandmarks(data, p1time, p2time, p1pos, p2pos, p1voltage, p2voltage,
-  baseline_n)
+findmormyridlandmarks(data, baseline_n)
 }
 \arguments{
 \item{data}{Two column waveform dataframe, time and voltage x n pts}
-
-\item{p1time}{time of p1 (calculated in eodplot.R)}
-
-\item{p2time}{time of p2 (calculated in eodplot.R)}
-
-\item{p1pos}{index of p1 (calculated in eodplot.R)}
-
-\item{p2pos}{index of p2 (calcualted in eodplot.R)}
-
-\item{p1voltage}{voltage of p1 (calcualted in eodplot.R)}
-
-\item{p2voltage}{voltage of p2 (calcualted in eodplot.R)}
 
 \item{baseline_n}{number of points to use in calculating baseline}
 }

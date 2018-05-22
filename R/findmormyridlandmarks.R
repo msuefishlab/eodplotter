@@ -2,20 +2,19 @@
 #' @export
 #'
 #' @param data Two column waveform dataframe, time and voltage x n pts
-#' @param p1pos index of p1 (calculated in eodplot.R)
-#' @param p2pos index of p2 (calcualted in eodplot.R)
-#' @param p1voltage voltage of p1 (calcualted in eodplot.R)
-#' @param p2voltage voltage of p2 (calcualted in eodplot.R)
 #' @param baseline_n number of points to use in calculating baseline
-#' @param p1time time of p1 (calculated in eodplot.R)
-#' @param p2time time of p2 (calculated in eodplot.R)
 
 
-findmormyridlandmarks <- function(data,p1time,p2time,p1pos,p2pos,p1voltage,p2voltage,baseline_n) {
+findmormyridlandmarks <- function(data,baseline_n) {
 
-p1=data.frame(time=p1time-p1time,index=p1pos,voltage=p1voltage)
-p2=data.frame(time=p2time-p1time,index=p2pos,voltage=p2voltage)
+#find p1 in waveform
+p1pos = which.max(data$voltage)
+p2pos = which.min(data$voltage)
 
+p1 = data[p1pos, ]
+p2 = data[p2pos, ]  
+  
+  
 leftside = data[1:p1pos, ]
 middle = data[p1pos:p2pos, ]
 rightside = data[p2pos:nrow(data), ]
@@ -43,14 +42,14 @@ for(i in nrow(leftside):1) {
   }
 }
 for(i in nrow(leftside):1) {
-  if(leftside[i, 'voltage'] < baseline + 0.02 * (p1voltage - p2voltage)) {
+  if(leftside[i, 'voltage'] < baseline + 0.02 * (p1$voltage - p2$voltage)) {
     t1 = leftside[i,]
     slope1 = leftside[i:nrow(leftside), ]
     break
   }
 }
 for(i in 1:nrow(rightside)) {
-  if(rightside[i, 'voltage'] > baseline - 0.02 * (p1voltage - p2voltage)) {
+  if(rightside[i, 'voltage'] > baseline - 0.02 * (p1$voltage - p2$voltage)) {
     t2 = rightside[i,]
     break
   }
@@ -92,7 +91,7 @@ if(!is.null(s2)) landmark_table = rbind(landmark_table, data.frame(landmark = 's
 if(!is.null(zc1)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc1', time = zc1$time, voltage = zc1$voltage))
 if(!is.null(zc2)) landmark_table = rbind(landmark_table, data.frame(landmark = 'zc2', time = zc2$time, voltage = zc2$voltage))
 landmark_table = rbind(landmark_table, data.frame(landmark = 'duration', time = t2$time-t1$time,voltage="NA_real_"))
-landmark_table = rbind(landmark_table, data.frame(landmark = 'amplitude', time = "NA_real_", voltage = p1voltage-p2voltage))
+landmark_table = rbind(landmark_table, data.frame(landmark = 'amplitude', time = "NA_real_", voltage = p1$voltage-p2$voltage))
 
 landmark_table
 

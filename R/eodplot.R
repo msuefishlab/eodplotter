@@ -80,55 +80,10 @@ findLandmarks <- function(plotdata) {
     neods<-dim(ret)[2]
     npoints<-dim(ret)[1]
 
-    # calculate average waveform
-    avg = apply(ret, 1, mean)
-    avg = avg[1:(length(avg)-1)]
-    data = data.frame(time = as.numeric(names(avg)), voltage = as.numeric(avg))
-    data = data[1:nrow(data)-1,]
-
-    #find p1 in average waveform
-    p1pos = which.max(data$voltage)
-
-    #calculate waveform  voltage @ P1
-    p1 = data[p1pos, ]
-    p1$index=p1pos
-
-
-    #find p1 in each individual waveform
-    p1pos_e = apply(ret,2,which.max)
-    p1pos_e = data.frame(time = as.numeric(names(p1pos_e)), index = as.numeric(p1pos_e))
-
-    #calculate waveform voltage @ each P1
-    p1_e<-data.frame(time = p1pos_e$time, voltage = ret[,1:neods][p1pos_e$index],index = p1pos_e$index )
-
-    #find p2 in average waveform
-    p2pos = which.min(data$voltage)
-
-    #calcualte waveform voltage @ P2
-    p2 = data[p2pos, ]
-    p2$index=p2pos
-    
-
-    #find p2 in each individual waveform
-    p2pos_e = apply(ret,2,which.min)
-    p2pos_e = data.frame(time = as.numeric(names(p2pos_e)), index = as.numeric(p2pos_e))
-
-
-    #calculate waveform voltage @ each P2
-    p2_e<-data.frame(time = p2pos_e$time, voltage = ret[,1:neods][p2pos_e$index], index=p2pos_e$index)
-
-
-    avg_p1_p2_data<-data.frame(p1=p1,p2=p2,p1_i=as.numeric(rownames(p1)),p2_i=as.numeric(rownames(p2)))
-
-
-    # drop in for species-specific stuff
-    #lm_av<-NULL
-    #lm_av<-findmormyridlandmarks(data,p1$index,p2$index,p1$voltage,p2$voltage,25)
-
     lm_raw<-NULL
     for (i in 1:neods) {
       d<-data.frame(time=as.numeric(names(ret[,i])),voltage=(ret[,i]))
-      lm_raw[[i]]<-findmormyridlandmarks(d,p1_e$time[i],p2_e$time[i],p1_e$index[i],p2_e$index[i],p1_e$voltage[i],p2_e$voltage[i], 25)
+      lm_raw[[i]]<-findmormyridlandmarks(d,25)
       lm_raw[[i]]$eodno<-i
     }
     
