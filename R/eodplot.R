@@ -122,8 +122,8 @@ findLandmarks <- function(plotdata) {
 
 
     # drop in for species-specific stuff
-    lm_av<-NULL
-    lm_av<-findmormyridlandmarks(data,p1$index,p2$index,p1$voltage,p2$voltage,25)
+    #lm_av<-NULL
+    #lm_av<-findmormyridlandmarks(data,p1$index,p2$index,p1$voltage,p2$voltage,25)
 
     lm_raw<-NULL
     for (i in 1:neods) {
