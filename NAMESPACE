@@ -2,7 +2,6 @@
 
 export(findLandmarks)
 export(getEODMatrix)
-export(getStats)
 export(peakFinder)
 export(plotAverage)
 export(plotEod)
