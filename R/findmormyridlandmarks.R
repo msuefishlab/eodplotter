@@ -1,3 +1,14 @@
+#' Find Landmarks from a Mormyrid EOD Waveform 
+#' @export
+#'
+#' @param data Two column waveform dataframe, time and voltage x n pts
+#' @param p1pos index of p1 (calculated in eodplot.R)
+#' @param p2pos index of p2 (calcualted in eodplot.R)
+#' @param p1voltage voltage of p1 (calcualted in eodplot.R)
+#' @param p2voltage voltage of p2 (calcualted in eodplot.R)
+#' @param baseline_n number of points to use in calculating baseline
+
+
 findmormyridlandmarks <- function(data,p1pos,p2pos,p1voltage,p2voltage,baseline_n) {
 
 leftside = data[1:p1pos, ]
