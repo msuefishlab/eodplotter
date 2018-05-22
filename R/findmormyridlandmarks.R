@@ -13,8 +13,8 @@
 
 findmormyridlandmarks <- function(data,p1time,p2time,p1pos,p2pos,p1voltage,p2voltage,baseline_n) {
 
-p1=data.frame(time=p1time,index=p1pos,voltage=p1voltage)
-p2=data.frame(time=p2time,index=p2pos,voltage=p2voltage)
+p1=data.frame(time=p1time-p1time,index=p1pos,voltage=p1voltage)
+p2=data.frame(time=p2time-p1time,index=p2pos,voltage=p2voltage)
 
 leftside = data[1:p1pos, ]
 middle = data[p1pos:p2pos, ]
